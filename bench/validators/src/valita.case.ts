@@ -1,4 +1,4 @@
-import { defineCase } from "@utils";
+import { defineCase } from '@utils';
 import { array, boolean, number, object, string } from '@badrap/valita';
 
 export default defineCase({
@@ -15,12 +15,12 @@ export default defineCase({
         deeplyNested: object({
           foo: string(),
           num: number(),
-          bool: boolean()
+          bool: boolean(),
         }),
-        items: array(number())
+        items: array(number()),
       });
 
       return (o) => schema.try(o).ok;
-    })()
-  }
-})
+    })(),
+  },
+});

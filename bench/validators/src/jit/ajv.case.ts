@@ -1,5 +1,5 @@
-import { defineCase } from "@utils";
-import Ajv from "ajv/dist/jtd";
+import { defineCase } from '@utils';
+import Ajv from 'ajv/dist/jtd';
 
 export default defineCase({
   name: 'ajv - jit',
@@ -16,15 +16,15 @@ export default defineCase({
           properties: {
             foo: { type: 'string' },
             num: { type: 'float64' },
-            bool: { type: 'boolean' }
+            bool: { type: 'boolean' },
           },
-          additionalProperties: true
+          additionalProperties: true,
         },
         items: {
-          elements: { type: 'float64' }
-        }
+          elements: { type: 'float64' },
+        },
       },
-      additionalProperties: true
+      additionalProperties: true,
     }),
 
     stringify: new Ajv().compileSerializer({
@@ -33,10 +33,10 @@ export default defineCase({
           name: { type: 'string' },
           pwd: { type: 'string' },
           id: {
-            elements: { type: 'float64' }
-          }
-        }
-      }
-    })
-  }
+            elements: { type: 'float64' },
+          },
+        },
+      },
+    }),
+  },
 });

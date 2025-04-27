@@ -1,4 +1,4 @@
-import { defineCase } from "@utils";
+import { defineCase } from '@utils';
 import { build as buildValidateJson } from 'stnl/compilers/validate-json';
 import { build as buildStringifyJson } from 'stnl/compilers/stringify-json';
 
@@ -7,21 +7,21 @@ export default defineCase({
   tests: {
     assertLoose: buildValidateJson({
       props: {
-        number: 'f64',
-        negNumber: 'f64',
-        maxNumber: 'f64',
+        number: 'float',
+        negNumber: 'float',
+        maxNumber: 'float',
         string: 'string',
         longString: 'string',
         boolean: 'bool',
         deeplyNested: {
           props: {
             foo: 'string',
-            num: 'f64',
-            bool: 'bool'
-          }
+            num: 'float',
+            bool: 'bool',
+          },
         },
-        items: { item: 'f64' }
-      }
+        items: { item: 'float' },
+      },
     }),
 
     stringify: buildStringifyJson({
@@ -29,9 +29,9 @@ export default defineCase({
         props: {
           name: 'string',
           pwd: 'string',
-          id: { item: 'f64' }
-        }
-      }
-    })
-  }
+          id: { item: 'float' },
+        },
+      },
+    }),
+  },
 });

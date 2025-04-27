@@ -1,4 +1,4 @@
-import type { Tests } from "./utils";
+import type { Tests } from './utils';
 
 export const excludeCase = (name: string) => false;
 export const includeCase = (name: string) => true;

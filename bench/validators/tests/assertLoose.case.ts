@@ -1,13 +1,11 @@
-import { randomStr, randRemoveProp } from "./utils";
+import { randomStr, randRemoveProp } from './utils.js';
 
 function trueValidator(this: { data: any }, fn: (o: any) => boolean) {
-  if (!fn(this.data))
-    throw new Error('A validator is invalid!');
+  if (!fn(this.data)) throw new Error('A validator is invalid!');
 }
 
 function falseValidator(this: { data: any }, fn: (o: any) => boolean) {
-  if (fn(this.data))
-    throw new Error('A validator is invalid!');
+  if (fn(this.data)) throw new Error('A validator is invalid!');
 }
 
 const valid = () => ({
@@ -21,11 +19,13 @@ const valid = () => ({
     deeplyNested: {
       foo: randomStr(),
       num: Math.random() * 78,
-      bool: Math.random() > 0.5
+      bool: Math.random() > 0.5,
     },
-    items: new Array(3 + Math.round(Math.random() * 9)).fill(0).map(Math.random)
+    items: new Array(3 + Math.round(Math.random() * 9))
+      .fill(0)
+      .map(Math.random),
   },
-  validate: trueValidator
+  validate: trueValidator,
 });
 
 const invalid = () => {
@@ -40,11 +40,8 @@ const deepInvalid = () => {
   randRemoveProp(data.data.deeplyNested);
   data.validate = falseValidator;
   return data;
-}
+};
 
-export default Array.from({ length: 500 }, (_, i) => i % 10 === 0
-  ? invalid()
-  : i % 20 === 0
-    ? deepInvalid()
-    : valid()
+export default Array.from({ length: 500 }, (_, i) =>
+  i % 10 === 0 ? invalid() : i % 20 === 0 ? deepInvalid() : valid(),
 );

@@ -1,17 +1,18 @@
 {
   "dependencies": {
-    "@badrap/valita": "^0.4.2",
-    "@sinclair/typebox": "^0.34.14",
+    "@badrap/valita": "^0.4.4",
+    "@sinclair/typebox": "^0.34.33",
+    "@zod/mini": "^4.0.0-beta.0",
     "ajv": "^8.17.1",
-    "typia": "^7.6.0",
-    "zod": "^3.24.1"
+    "typia": "^7.6.4",
+    "zod": "^4.0.0-beta.20250424T163858"
   },
   "devDependencies": {
     "typescript": "~5.7.3"
   },
   "scripts": {
     "prepare": "bun prepare.ts",
-    "bench:bun": "bun index.ts",
+    "bench:bun": "BUN_JSC_useRecursiveJSONParse=false bun index.ts",
     "bench:node": "bun tsx --expose-gc --allow-natives-syntax index.ts",
     "bench": "bun bench:bun && bun bench:node",
     "start:bun": "bun prepare && bun bench:bun",

@@ -1,4 +1,4 @@
-import { defineCase } from "@utils";
+import { defineCase } from '@utils';
 
 import { TypeSystemPolicy } from '@sinclair/typebox/system';
 import { Type } from '@sinclair/typebox';
@@ -23,10 +23,10 @@ export default defineCase({
           num: Type.Number(),
           bool: Type.Boolean(),
         }),
-        items: Type.Array(Type.Number())
+        items: Type.Array(Type.Number()),
       });
 
       return (o) => Value.Check(schema, o);
-    })()
-  }
-})
+    })(),
+  },
+});

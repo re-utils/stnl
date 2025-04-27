@@ -1,9 +1,9 @@
 import { summary, run, bench, do_not_optimize } from 'mitata';
-import type { Tests } from './utils';
-import tests from './tests';
-import cases from './src';
+import type { Tests } from './utils.js';
+import tests from './tests/index.js';
+import cases from './src/index.js';
 
-import { excludeCase, includeCase, excludeTest, includeTest } from './filter';
+import { excludeCase, includeCase, excludeTest, includeTest } from './filter.js';
 
 const casesMap = new Map<string, [string, Tests[keyof Tests]][]>();
 
@@ -15,10 +15,8 @@ for (const c of cases) {
   for (const test in c.tests) {
     const fn = c.tests[test as keyof typeof c.tests];
 
-    if (casesMap.has(test))
-      casesMap.get(test)!.push([name, fn]);
-    else
-      casesMap.set(test, [[name, fn]]);
+    if (casesMap.has(test)) casesMap.get(test)!.push([name, fn]);
+    else casesMap.set(test, [[name, fn]]);
   }
 }
 
@@ -37,21 +35,20 @@ casesMap.forEach((val, key) => {
       const fn = test[1];
 
       // Check if function validate correctly
-      suite.forEach((t) => t.validate(fn as any));
+      for (const t of suite)
+        t.validate(fn as any);
 
-      // Try to optimize
-      for (let i = 0; i < 100; i++)
-        do_not_optimize(suiteData.map(fn as any));
+      console.log(test[0], fn.toString());
 
       bench(test[0] + ` (${key})`, function* () {
         yield {
-          [0](){
+          [0]() {
             return suiteData;
           },
           bench(suiteData: any) {
-            do_not_optimize(suiteData.map(fn as any))
-          }
-        }
+            do_not_optimize(suiteData.map(fn as any));
+          },
+        };
       });
     }
   });
