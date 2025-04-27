@@ -1,8 +1,8 @@
 import { describe, test, expect } from 'bun:test';
-import suites from '../data/suites';
+import suites from '../data/suites/index.js';
 
-import { build } from "../src/compilers/validate-json";
-import compose from "../src/compilers/validate-json/compose";
+import { build } from '../src/compilers/validate-json/index.js';
+import compose from '../src/compilers/validate-json/compose.js';
 
 for (const suite of suites) {
   describe(suite.name, () => {
@@ -15,7 +15,7 @@ for (const suite of suites) {
         expect(composedFn(i.value)).toBe(i.valid);
       });
     }
-  })
+  });
 }
 
 // createTest(

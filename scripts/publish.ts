@@ -1,6 +1,4 @@
-import { cpToLib, exec } from './utils';
+import { cd, exec, LIB } from './utils.js';
 
-// Write required files
-await Promise.all(['./README.md', './package.json'].map(cpToLib));
-
-await exec`cd lib && bun publish --access=public`;
+cd(LIB);
+await exec`bun publish --access=public`;

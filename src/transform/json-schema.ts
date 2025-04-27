@@ -1,23 +1,60 @@
-import type { TType, TString, TList, TObject, TTuple, TRef, TConst, TSchema, TTaggedUnion, TBasic, TExtendedBasic, TFloat, TInt } from '../index.js';
+import type {
+  TType,
+  TString,
+  TList,
+  TObject,
+  TTuple,
+  TRef,
+  TConst,
+  TSchema,
+  TTaggedUnion,
+  TBasic,
+  TExtendedBasic,
+  TFloat,
+  TInt,
+} from '../index.js';
 
 type Value = string | number | boolean | null;
-type Keywords = '$defs' | '$ref' | 'minimum' | 'maximum' |
-  'exclusiveMinimum' | 'exclusiveMaximum' | 'minLength' |
-  'maxLength' | 'items' | 'prefixItems' | 'minItems' |
-  'maxItems' | 'properties' | 'required' | 'type' |
-  'const' | 'allOf' | 'anyOf';
+type Keywords =
+  | '$defs'
+  | '$ref'
+  | 'minimum'
+  | 'maximum'
+  | 'exclusiveMinimum'
+  | 'exclusiveMaximum'
+  | 'minLength'
+  | 'maxLength'
+  | 'items'
+  | 'prefixItems'
+  | 'minItems'
+  | 'maxItems'
+  | 'properties'
+  | 'required'
+  | 'type'
+  | 'const'
+  | 'allOf'
+  | 'anyOf';
 
 type OutputSchema = Partial<{
-  [x in Keywords]: Value | Value[] | Record<string, Value> | OutputSchema | OutputSchema[] | Record<string, OutputSchema>
+  [x in Keywords]:
+    | Value
+    | Value[]
+    | Record<string, Value>
+    | OutputSchema
+    | OutputSchema[]
+    | Record<string, OutputSchema>;
 }>;
 
 export const loadTypeRecord = (rec: Record<string, TType>): OutputSchema => {
   const defs: OutputSchema = Object.create(rec);
-  for (const key in defs) loadSchema(rec[key], defs[key as Keywords] = {});
+  for (const key in defs) loadSchema(rec[key], (defs[key as Keywords] = {}));
   return defs;
 };
 
-export const loadObjectProps = (schema: TObject, output: OutputSchema): void => {
+export const loadObjectProps = (
+  schema: TObject,
+  output: OutputSchema,
+): void => {
   // Required props
   let props = schema.props;
   if (props != null) {
@@ -28,11 +65,13 @@ export const loadObjectProps = (schema: TObject, output: OutputSchema): void => 
   // Optional props
   props = schema.optionalProps;
   if (props != null) {
-    const tmp: Record<string, OutputSchema> | undefined = output.properties as any;
+    const tmp: Record<string, OutputSchema> | undefined =
+      output.properties as any;
 
-    if (tmp == null)
-      output.properties = loadTypeRecord(props);
-    else for (const itemKey in props) loadSchema(props[itemKey], tmp[itemKey] = {});
+    if (tmp == null) output.properties = loadTypeRecord(props);
+    else
+      for (const itemKey in props)
+        loadSchema(props[itemKey], (tmp[itemKey] = {}));
   }
 };
 
@@ -73,17 +112,18 @@ export const loadType = (type: TBasic, output: OutputSchema): void => {
       output.type = 'integer';
       output.minimum = 0;
       // eslint-disable-next-line
-      output.maximum = (2 ** +type.slice(1)) - 1;
+      output.maximum = 2 ** +type.slice(1) - 1;
       return;
     }
   }
 };
 
-export const loadRange = (schema: TInt | TFloat, output: OutputSchema): void => {
-  if (schema.max != null)
-    output.maximum = schema.max;
-  if (schema.min != null)
-    output.minimum = schema.min;
+export const loadRange = (
+  schema: TInt | TFloat,
+  output: OutputSchema,
+): void => {
+  if (schema.max != null) output.maximum = schema.max;
+  if (schema.min != null) output.minimum = schema.min;
 };
 
 export function loadSchema(schema: TType, output: OutputSchema): void {
@@ -93,15 +133,13 @@ export function loadSchema(schema: TType, output: OutputSchema): void {
   }
 
   const isNil = schema.nullable === true;
-  if (isNil)
-    output.type = 'null';
+  if (isNil) output.type = 'null';
 
   for (const key in schema) {
     if (key === 'type') {
       loadType((schema as TExtendedBasic).type, output);
 
-      if (isNil)
-        output.type = ['null', output.type as string];
+      if (isNil) output.type = ['null', output.type as string];
 
       switch ((schema as TExtendedBasic).type.charCodeAt(0)) {
         // Float
@@ -181,7 +219,8 @@ export function loadSchema(schema: TType, output: OutputSchema): void {
 
       const schemas = (schema as TTuple).values;
       const vals: OutputSchema[] = new Array(schemas.length);
-      for (let i = 0; i < schemas.length; i++) loadSchema(schemas[i], vals[i] = {});
+      for (let i = 0; i < schemas.length; i++)
+        loadSchema(schemas[i], (vals[i] = {}));
       output.prefixItems = vals;
 
       return;
@@ -190,17 +229,16 @@ export function loadSchema(schema: TType, output: OutputSchema): void {
 }
 
 export type AnyJSONSchema = OutputSchema & {
-  $schema: 'http://json-schema.org/draft-07/schema'
+  $schema: 'http://json-schema.org/draft-07/schema';
 };
 
 export default (schema: TSchema): AnyJSONSchema => {
   const output: AnyJSONSchema = {
-    $schema: 'http://json-schema.org/draft-07/schema'
+    $schema: 'http://json-schema.org/draft-07/schema',
   };
   loadSchema(schema, output);
 
-  if (schema.defs != null)
-    output.$defs = loadTypeRecord(schema.defs);
+  if (schema.defs != null) output.$defs = loadTypeRecord(schema.defs);
 
   return output;
 };

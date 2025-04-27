@@ -1,30 +1,56 @@
-import type { TType, TList, TObject, TTuple, TRef, TConst, TSchema, TTaggedUnion, InferSchema, TBasic, TExtendedBasic } from '../../index.js';
+import type {
+  TType,
+  TList,
+  TObject,
+  TTuple,
+  TRef,
+  TConst,
+  TSchema,
+  TTaggedUnion,
+  InferSchema,
+  TBasic,
+  TExtendedBasic,
+} from '../../index.js';
 import buildSchema from '../build.js';
 
-export const isSerializableType = (type: TBasic): boolean => (/^[iufb].*/).test(type);
+export const isSerializableType = (type: TBasic): boolean =>
+  /^[ifb].*/.test(type);
 
 // eslint-disable-next-line
-export const loadType = (type: TBasic, id: string, isAlreadyString: boolean): string => isSerializableType(type)
-  ? isAlreadyString ? id : `''+${id}`
-  : `JSON.stringify(${id})`;
+export const loadType = (
+  type: TBasic,
+  id: string,
+  isAlreadyString: boolean,
+): string =>
+  isSerializableType(type)
+    ? isAlreadyString
+      ? id
+      : `''+${id}`
+    : type === 'string'
+      ? `(/["\\b\\t\\n\\v\\f\\r\\/]/.test(${id})?JSON.stringify(${id}):'"'+${id}+'"')`
+      : `JSON.stringify(${id})`;
 
 type State = [refs: Record<string, number>, decls: string[]];
 
-export const loadSchema = (schema: TType, id: string, isAlreadyString: boolean, state: State): string => {
-  if (typeof schema === 'string')
-    return loadType(schema, id, isAlreadyString);
+export const loadSchema = (
+  schema: TType,
+  id: string,
+  isAlreadyString: boolean,
+  state: State,
+): string => {
+  if (typeof schema === 'string') return loadType(schema, id, isAlreadyString);
 
   let str = schema.nullable === true ? `${id}===null?'null':` : '';
 
   for (const key in schema) {
     if (key === 'type')
       return loadType((schema as TExtendedBasic).type, id, isAlreadyString);
-    else if (key === 'item') {
+
+    if (key === 'item') {
       let item = (schema as TList).item;
 
       if (typeof item !== 'string') {
-        if ('type' in item)
-          item = item.type;
+        if ('type' in item) item = item.type;
         else {
           // Handle complex types
           return `${str}(${id}.length===0?"[]":"["+${id}.map((o)=>${loadSchema((schema as TList).item, 'o', true, state)}).join()+"]")`;
@@ -32,11 +58,15 @@ export const loadSchema = (schema: TType, id: string, isAlreadyString: boolean, 
       }
 
       // Handle string types
-      return str + (isSerializableType(item)
-        ? `"["+${id}.join()+"]"`
-        : `(${id}.length===0?"[]":"["+${id}.map(JSON.stringify).join()+"]")`
+      return (
+        str +
+        (isSerializableType(item)
+          ? `"["+${id}.join()+"]"`
+          : `(${id}.length===0?"[]":"["+${id}.map(JSON.stringify).join()+"]")`)
       );
-    } else if (key === 'props' || key === 'optionalProps') {
+    }
+
+    if (key === 'props' || key === 'optionalProps') {
       str += '"{"+';
 
       // Optimal string concat
@@ -64,7 +94,9 @@ export const loadSchema = (schema: TType, id: string, isAlreadyString: boolean, 
 
       // Remove the leading ','
       return `${str}${hasRequiredKeys ? '' : '.slice(1)'}+"}"`;
-    } else if (key === 'tag' || key === 'map') {
+    }
+
+    if (key === 'tag' || key === 'map') {
       str += '"{"+(';
 
       const tag = (schema as TTaggedUnion).tag;
@@ -86,25 +118,36 @@ export const loadSchema = (schema: TType, id: string, isAlreadyString: boolean, 
 
         props = tmpSchema.props;
         if (props != null)
-          for (const itemKey in props) str += `+',"${itemKey}":'+(${loadSchema(props[itemKey], `${id}.${itemKey}`, true, state)})`;
+          for (const itemKey in props)
+            str += `+',"${itemKey}":'+(${loadSchema(props[itemKey], `${id}.${itemKey}`, true, state)})`;
 
         props = (schema as TObject).optionalProps;
         if (props != null)
-          for (const itemKey in props) str += `+(typeof ${id}.${itemKey}==="undefined"?"":',"${itemKey}":'+(${loadSchema(props[itemKey], `${id}.${itemKey}`, true, state)}))`;
+          for (const itemKey in props)
+            str += `+(typeof ${id}.${itemKey}==="undefined"?"":',"${itemKey}":'+(${loadSchema(props[itemKey], `${id}.${itemKey}`, true, state)}))`;
 
         str += '):';
       }
 
       return `${str}"")+"}"`;
-    } else if (key === 'const') {
+    }
+
+    if (key === 'const') {
       // Inline constants
-      return str + (typeof (schema as TConst).const === 'string'
-        ? JSON.stringify((schema as TConst).const)
-        : `"${(schema as TConst).const}"`);
-    } else if (key === 'ref') {
+      return (
+        str +
+        (typeof (schema as TConst).const === 'string'
+          ? JSON.stringify((schema as TConst).const)
+          : `"${(schema as TConst).const}"`)
+      );
+    }
+
+    if (key === 'ref') {
       // Search references
       return `${str}d${state[0][(schema as TRef).ref]}(${id})`;
-    } else if (key === 'values') {
+    }
+
+    if (key === 'values') {
       // Handle tuples
       const schemas = (schema as TTuple).values;
 
@@ -127,7 +170,10 @@ export const loadSchema = (schema: TType, id: string, isAlreadyString: boolean, 
 
 const f = (schema: TSchema, id: string, decls: string[]): string => {
   if (schema.defs == null)
-    return loadSchema(schema, id, false, [null as unknown as Record<string, number>, decls]);
+    return loadSchema(schema, id, false, [
+      null as unknown as Record<string, number>,
+      decls,
+    ]);
 
   const refs: Record<string, number> = {};
   const state: State = [refs, decls];
@@ -136,14 +182,19 @@ const f = (schema: TSchema, id: string, decls: string[]): string => {
   const schemas: [TType, number][] = [];
 
   // Initialize references first
-  for (const key in defs) schemas.push([defs[key], refs[key] = decls.push('')]);
+  for (const key in defs)
+    schemas.push([defs[key], (refs[key] = decls.push(''))]);
 
   // Then build the schemas
   // eslint-disable-next-line
-  for (let i = 0, l = schemas.length; i < l; i++) decls[schemas[i][1]] = '(o)=>' + loadSchema(schemas[i][0], 'o', false, state);
+  for (let i = 0, l = schemas.length; i < l; i++)
+    decls[schemas[i][1]] =
+      '(o)=>' + loadSchema(schemas[i][0], 'o', false, state);
 
   return loadSchema(schema, id, false, state);
 };
 
 export default f;
-export const build = <const T extends TSchema>(schema: T): (o: InferSchema<T>) => string => buildSchema(schema, f) as any;
+export const build = <const T extends TSchema>(
+  schema: T,
+): ((o: InferSchema<T>) => string) => buildSchema(schema, f) as any;

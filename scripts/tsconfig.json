@@ -10,11 +10,7 @@
     // Bundler mode
     "moduleResolution": "Bundler",
     "verbatimModuleSyntax": true,
-    "skipLibCheck": true,
-    "paths": {
-      "stnl": ["../src/index.ts"],
-      "stnl/*": ["../src/*"]
-    }
+    "skipLibCheck": true
   },
   "include": ["./**/*.ts"]
 }

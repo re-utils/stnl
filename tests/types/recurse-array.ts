@@ -1,19 +1,19 @@
-import type { InferSchema } from '../lib/index.js';
+import type { InferSchema } from '../../src/index.js';
 import type { Equal, Expect } from './types.js';
 
 type Output = InferSchema<{
   defs: {
     link: {
       props: {
-        id: { type: 'int' },
+        id: 'float';
         items: {
-          items: { ref: 'link' }
-        }
-      }
-    }
-  }
+          item: { ref: 'link' };
+        };
+      };
+    };
+  };
 
-  ref: 'link'
+  ref: 'link';
 }>;
 
 interface Expected {

@@ -1,5 +1,14 @@
-import { join } from 'node:path';
-import { write, file, $, type ShellOutput } from 'bun';
+import { write, file, $ } from 'bun';
+import { resolve, join } from 'node:path/posix';
 
-export const cpToLib = async (path: string): Promise<number> => write(join('./lib', path), file(path));
-export const exec: (...args: Parameters<typeof $>) => Promise<any> = async (...args) => $(...args).catch((err: ShellOutput) => process.stderr.write(err.stderr as any));
+export const SCRIPTS = import.meta.dir;
+export const ROOT = resolve(SCRIPTS, '..');
+export const SOURCE = ROOT + '/src';
+export const LIB = ROOT + '/lib';
+export const BENCH = ROOT + '/bench';
+
+export const cp = (from: string, to: string, path: string) =>
+  write(join(to, path), file(join(from, path)));
+export const exec = (...args: Parameters<typeof $>) =>
+  $(...args).catch((err) => process.stderr.write(err.stderr as any));
+export const cd = (dir: string) => $.cwd(dir);

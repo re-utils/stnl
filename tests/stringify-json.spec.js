@@ -1,8 +1,8 @@
-import { describe, test, expect } from "bun:test";
-import suites from "../data/suites";
+import { describe, test, expect } from 'bun:test';
+import suites from '../data/suites/index.js';
 
-import { build } from "../src/compilers/stringify-json";
-import compose from "../src/compilers/stringify-json/compose";
+import { build } from '../src/compilers/stringify-json/index.js';
+import compose from '../src/compilers/stringify-json/compose.js';
 
 for (const suite of suites) {
   describe(suite.name, () => {

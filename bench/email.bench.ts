@@ -28,16 +28,16 @@ const emails = [
   'email@example.co.jp',
   'firstname-lastname@example.com',
 
-  'much."more\ unusual"@example.com',
+  'much."more unusual"@example.com',
   'very.unusual."@".unusual.com@example.com',
-  'very."(),:;<>[]".VERY."very@\\\\\\ \"very".unusual@strange.example.com',
+  'very."(),:;<>[]".VERY."very@\\\\\\ "very".unusual@strange.example.com',
 
   'plainaddress',
   '#@%^%#$@#$@#.com',
 
-  '"(),:;<>[\]@example.com',
+  '"(),:;<>[]@example.com',
   'just"not"right@example.com',
-  'this\ is\"really\"not\\\\allowed@example.com'
+  'this is"really"not\\\\allowed@example.com',
 ];
 
 bench('Baseline', function* () {
@@ -47,9 +47,13 @@ bench('Baseline', function* () {
     },
     bench(emails: string[]) {
       for (let i = 0; i < emails.length; i++)
-        do_not_optimize((/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/).test(emails[i]));
-    }
-  }
+        do_not_optimize(
+          /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+            emails[i],
+          ),
+        );
+    },
+  };
 });
 
 bench('First part non-greedy', function* () {
@@ -59,9 +63,13 @@ bench('First part non-greedy', function* () {
     },
     bench(emails: string[]) {
       for (let i = 0; i < emails.length; i++)
-        do_not_optimize((/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+?@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/).test(emails[i]));
-    }
-  }
+        do_not_optimize(
+          /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+?@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+            emails[i],
+          ),
+        );
+    },
+  };
 });
 
 run();
