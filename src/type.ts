@@ -16,9 +16,10 @@ export interface IType<
   0: I;
   [_]: T;
 }
+export type TLoadedType = IType<number, any, never>;
 
 // Userland infer type
-export type TInfer<T extends IType<number, any, never>> = T[_];
+export type TInfer<T extends TLoadedType> = T[_];
 
 type TypeRecord = Record<string, IType>;
 type InferTypeList<T extends IType[]> = T extends [
@@ -102,16 +103,17 @@ type LoadRefList<T extends any[], M extends Record<string, any>> = T extends [
 ]
   ? [LoadRef<A, M>, ...LoadRefList<B, M>]
   : [];
-type LoadRef<T, M extends Record<string, any>> =
-  T extends Ref<infer K extends keyof M>
-    ? LoadRef<M[K], M>
-    : T extends Record<string, any>
-      ? {
-          [K in keyof T]: LoadRef<T[K], M>;
-        }
-      : T extends any[]
-        ? LoadRefList<T, M>
-        : T;
+type LoadRef<T, M extends Record<string, any>> = T extends Ref<
+  infer K extends keyof M
+>
+  ? LoadRef<M[K], M>
+  : T extends Record<string, any>
+    ? {
+        [K in keyof T]: LoadRef<T[K], M>;
+      }
+    : T extends any[]
+      ? LoadRefList<T, M>
+      : T;
 
 // A scope that loads some references
 export type TScope<

@@ -132,3 +132,42 @@ t.nullable(
   })
 );
 ```
+
+### Scopes & references
+Recursive types with scope:
+```ts
+// interface Node { value: string, next: Node | null }
+const node = t.scope(
+  t.record(
+    { value: t.string },
+    { next: t.self } // Reference to the root type of the scope
+  )
+);
+```
+
+References defined types in scope:
+```ts
+const user = t.scope(
+  t.record({
+    name: t.ref('name')
+  }),
+  { name: t.limit(t.string, 3, 16) }
+};
+```
+
+Generics with scope:
+```ts
+// node is an unresolved type
+const node = t.record(
+  { value: t.ref('type') },
+  { next: t.self }
+);
+
+// This will error as not all references of node has been resolved
+type Node = t.TInfer<typeof node>;
+
+// int_node is a resolved type
+const int_node = t.scope(node, {
+  type: t.int
+});
+```
