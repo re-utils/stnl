@@ -1,15 +1,11 @@
-import { t } from 'stnl';
+import { t } from "stnl";
 
 const A = t.scope(
-  t.record(
-    {
-      x: t.ref('x'),
-      y: t.ref('y'),
-    },
-    {
-      next: t.self,
-    },
-  ),
+  t.record({
+    x: t.ref("x"),
+    y: t.ref("y"),
+    next: t.nullable_self,
+  }),
   { x: t.int },
 );
 

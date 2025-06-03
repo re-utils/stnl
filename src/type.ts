@@ -39,7 +39,8 @@ interface NullableMap {
 }
 type ToNullable<T extends IType<keyof NullableMap>> = IType<
   NullableMap[T[0]],
-  T[_]
+  T[_] | null,
+  T[_ref]
 >;
 
 export type TInt = IType<0, number, never>;
@@ -228,9 +229,14 @@ export const tag = <const I extends string, T extends TypeRecord>(
 export const ref = <const T extends string>(t: T): TRef<T> => [22, t] as any;
 
 /**
- * Reference to the type of the upper scope
+ * Reference to the scope type
  */
 export const self: TRef<_ref> = [22] as any;
+
+/**
+ * Nullable reference to the type of the upper scope
+ */
+export const nullable_self: ToNullable<TRef<_ref>> = [22] as any;
 
 interface FScope {
   <
