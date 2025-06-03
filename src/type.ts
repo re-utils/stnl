@@ -18,7 +18,7 @@ export interface IType<
 }
 
 // Userland infer type
-export type TInfer<T extends IType> = T[_ref] extends never ? T[_] : never;
+export type TInfer<T extends IType<number, any, never>> = T[_];
 
 type TypeRecord = Record<string, IType>;
 type InferTypeList<T extends IType[]> = T extends [
@@ -48,13 +48,13 @@ export type TFloat = IType<2, number, never>;
 export type TString = IType<4, string, never>;
 export type TNilString = IType<5, string | null, never>;
 export type TBool = IType<6, boolean, never>;
-export type TAny = IType<8, boolean, never>;
+export type TAny = IType<8, unknown, never>;
 
 // Non primitives
-type CUnion = [string, string, ...string[]] | [number, number, ...number[]];
+type CUnion = [string, string, ...string[]];
 export type TUnion<T extends CUnion> = IType<10, T[number], never>;
 
-type CConst = number | string | boolean | null;
+type CConst = number | string | boolean;
 export type TConst<T extends CConst> = IType<12, T, never>;
 
 export type TList<T extends IType> = IType<14, T[_][], T[_ref]>;
@@ -188,7 +188,7 @@ export const value = <const T extends CConst>(t: T): TConst<T> =>
  */
 export const list = <const T extends IType>(
   t: T,
-  minLen?: number | null,
+  minLen?: number,
   maxLen?: number,
 ): TList<T> => [14, t, minLen, maxLen] as any;
 
@@ -217,7 +217,10 @@ export const tuple = <T extends CTuple>(t: T): TTuple<T> => [18, t] as any;
  * @param tag
  * @param map
  */
-export const tag = <const I extends string, T extends TypeRecord>(
+export const tag = <
+  const I extends string,
+  T extends Record<string, TRecord<TypeRecord, TypeRecord>>,
+>(
   tag: I,
   map: T,
 ): TTag<I, T> => [20, tag, map] as any;

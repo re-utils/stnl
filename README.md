@@ -1,56 +1,134 @@
-# Library template
+A simple type validator built for performance.
 
-An NPM library template using Bun.
+## Features
+- Types work across languages
+- Efficient representation format
+- Fast compilation types
 
-```sh
-bun create https://github.com/aquapi/lib-template
+## Builder
+`stnl` schema builder.
+```ts
+import { t } from 'stnl';
 ```
 
-## Scripts
+### Type inference
+To infer payload type of a schema built using the schema builder:
+```ts
+const schema = t.list(t.int);
 
-All script sources and usage.
-
-### [Build](./scripts/build.ts)
-
-Emit `.mjs` and `.d.ts` files to [`lib`](./lib).
-
-```sh
-bun task build
+// number[]
+type T = t.TInfer<typeof schema>;
 ```
 
-### [Publish](./scripts/publish.ts)
+### Primitives
+- `t.int`: integer
+- `t.float`: floating-point number
+- `t.string`: string
+- `t.nullable_string`: string or `null`
+- `t.bool`: boolean
+- `t.any`: any type
 
-Publish the package.
+To set integer/float range or string size limit, use `t.limit`:
+```ts
+// value >= 1
+t.limit(t.int, 1);
 
-```sh
-bun task publish
+// value <= 10
+t.limit(t.int, null, 10);
+
+// 1 <= value <= 10
+t.limit(t.float, 1, 10);
+
+// str.length >= 8
+t.limit(t.string, 8);
+
+// str.length <= 32
+t.limit(t.string, null, 32);
+
+// 8 <= str.length <= 32
+t.limit(t.string, 8, 32);
 ```
 
-### [Bench](./scripts/bench.ts)
-
-Run all files that ends with `.bench.ts` in [`bench`](./lib).
-
-```sh
-bun task bench
+### Unions
+```ts
+// Match 'admin' or 'user'
+t.union(['admin', 'user']);
 ```
 
-To run a specific file.
+### Constants
+`t.value()` only accepts `number`, `string`, or `boolean`.
+```ts
+// Match only 0
+t.value(0);
 
-```sh
-bun task bench index # Run bench/index.bench.ts
+// Match only 'str'
+t.value('str');
+
+// Match only true
+t.value(true);
 ```
 
-To run the benchmarks in `node`.
-```bash
-bun task bench --node
+### Lists
+```ts
+// A list of integers
+t.list(t.int);
 
-bun task bench --node index # Run bench/index.bench.ts with node
+// A list of string with list.length >= 1
+t.list(t.string, 1);
+
+// A list of float with list.length <= 10
+t.list(t.float, 0, 10);
+
+// A list of float with 1 <= list.length <= 10
+t.list(t.float, 1, 10);
 ```
 
-### [Size report](./scripts/report-size.ts)
+### Records
+```ts
+// { id: number, name: string, display_names?: string[] }
+t.record(
+  // Required properties
+  {
+    id: t.int,
+    name: t.string
+  },
+  // Optional properties
+  {
+    display_names: t.list(t.string)
+  }
+);
+```
 
-Report code size, minified size, gzipped size and minified gzipped size of every **built** entrypoint.
+### Tuples
+```ts
+// [number, string]
+t.tuple([
+  t.int,
+  t.string
+]);
+```
 
-```sh
-bun task report-size
+### Tagged unions
+```ts
+// { role: 'admin', id: string } | { role: 'user', name: string }
+t.tag('role', {
+  admin: t.record({
+    id: t.string
+  }),
+  user: t.record({
+    name: t.string
+  })
+});
+```
+
+### Nullable types
+To make a schema accepts `null`:
+```ts
+// { name: string, id: number } | null
+t.nullable(
+  t.record({
+    name: t.string,
+    id: t.int
+  })
+);
 ```
