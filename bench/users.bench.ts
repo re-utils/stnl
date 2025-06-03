@@ -12,19 +12,6 @@ summary(() => {
     });
   };
 
-  setup(
-    "fast inlining",
-    (o: any) =>
-      Number.isInteger(o.id) &&
-      typeof o.name === "string" &&
-      Array.isArray(o.friends) &&
-      o.friends.every(
-        (o: any) =>
-          (o.type === 0 || o.type === 1 || o.type === 2) &&
-          Number.isInteger(o.id),
-      ),
-  );
-
   {
     const subMatch = (o: any) =>
       (o.type === 0 || o.type === 1 || o.type === 2) && Number.isInteger(o.id);
@@ -38,6 +25,19 @@ summary(() => {
         o.friends.every(subMatch),
     );
   }
+
+  setup(
+    "fast inlining",
+    (o: any) =>
+      Number.isInteger(o.id) &&
+      typeof o.name === "string" &&
+      Array.isArray(o.friends) &&
+      o.friends.every(
+        (o: any) =>
+          (o.type === 0 || o.type === 1 || o.type === 2) &&
+          Number.isInteger(o.id),
+      ),
+  );
 });
 
 run();
