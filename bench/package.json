@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "data": "bun data/index.ts"
+  }
+}
