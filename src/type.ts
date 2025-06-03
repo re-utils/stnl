@@ -1,0 +1,251 @@
+type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
+
+declare const _: unique symbol;
+type _ = typeof _;
+
+declare const _ref: unique symbol;
+type _ref = typeof _ref;
+
+export interface IType<
+  out I extends number = number,
+  in out T = any,
+  out R = any,
+> extends Ref<R> {
+  0: I;
+  [_]: T;
+}
+
+// Userland infer type
+export type TInfer<T extends IType> = T[_ref] extends never ? T[_] : never;
+
+type TypeRecord = Record<string, IType>;
+type InferTypeList<T extends IType[]> = T extends [
+  infer A extends IType,
+  ...infer B extends IType[],
+]
+  ? [A[_], ...InferTypeList<B>]
+  : [];
+
+interface NullableMap {
+  10: 11;
+  12: 13;
+  14: 15;
+  16: 17;
+  18: 19;
+  20: 21;
+  22: 23;
+}
+type ToNullable<T extends IType<keyof NullableMap>> = IType<
+  NullableMap[T[0]],
+  T[_]
+>;
+
+export type TInt = IType<0, number, never>;
+export type TFloat = IType<2, number, never>;
+export type TString = IType<4, string, never>;
+export type TNilString = IType<5, string | null, never>;
+export type TBool = IType<6, boolean, never>;
+export type TAny = IType<8, boolean, never>;
+
+// Non primitives
+type CUnion = [string, string, ...string[]] | [number, number, ...number[]];
+export type TUnion<T extends CUnion> = IType<10, T[number], never>;
+
+type CConst = number | string | boolean | null;
+export type TConst<T extends CConst> = IType<12, T, never>;
+
+export type TList<T extends IType> = IType<14, T[_][], T[_ref]>;
+export type TRecord<
+  Required extends TypeRecord,
+  Optional extends TypeRecord,
+> = IType<
+  16,
+  Prettify<
+    {
+      [K in keyof Required]: Required[K][_];
+    } & {
+      [K in keyof Optional]?: Optional[K][_];
+    }
+  >,
+  (Required[keyof Required] | Optional[keyof Optional])[_ref]
+>;
+
+type CTuple = [IType, IType, ...IType[]];
+export type TTuple<T extends CTuple> = IType<
+  18,
+  InferTypeList<T>,
+  T[number][_ref]
+>;
+
+export type TTag<I extends string, T extends TypeRecord> = IType<
+  20,
+  Prettify<
+    {
+      [K in keyof T]: { [N in I]: K } & T[K][_];
+    }[keyof T]
+  >,
+  T[keyof T][_ref]
+>;
+
+// References
+interface Ref<T> {
+  [_ref]: T;
+}
+export type TRef<T> = IType<22, Ref<T>, T>;
+
+type LoadRefList<T extends any[], M extends Record<string, any>> = T extends [
+  infer A,
+  ...infer B,
+]
+  ? [LoadRef<A, M>, ...LoadRefList<B, M>]
+  : [];
+type LoadRef<T, M extends Record<string, any>> =
+  T extends Ref<infer K extends keyof M>
+    ? LoadRef<M[K], M>
+    : T extends Record<string, any>
+      ? {
+          [K in keyof T]: LoadRef<T[K], M>;
+        }
+      : T extends any[]
+        ? LoadRefList<T, M>
+        : T;
+
+// A scope that loads some references
+export type TScope<
+  T extends IType,
+  R extends Record<any, IType | undefined>,
+> = IType<
+  24,
+  LoadRef<
+    T[_],
+    {
+      [K in keyof R]: (R[K] & {})[_];
+    } & Ref<T[_]>
+  >,
+  Exclude<T[_ref], _ref | keyof R>
+>;
+
+// Type passable to limit()
+declare const _lim: unique symbol;
+interface TLimitable {
+  [_lim]: null;
+}
+
+// Primitives
+export const int: TInt & TLimitable = [0] as any;
+export const float: TFloat & TLimitable = [2] as any;
+
+export const string: TString & TLimitable = [4] as any;
+export const nullable_string: TNilString & TLimitable = [5] as any;
+
+export const bool: TBool = [6] as any;
+export const any: TAny = [8] as any;
+
+/**
+ * Create a nullable type
+ * @param t
+ */
+export const nullable = <
+  // Allow only non primitive types
+  const T extends IType<keyof NullableMap>,
+>(
+  t: T,
+): ToNullable<T> => (t as any as any[]).with(0, t[0] + 1) as any;
+
+/**
+ * Limit length range for string or range for number
+ * @param t - The type to limit
+ * @param min
+ * @param max
+ */
+export const limit = <const R extends IType>(
+  t: R & TLimitable,
+  min: number | null,
+  max?: number,
+): R => [t[0], min, max] as any;
+
+/**
+ * Create an union schema
+ * @param l
+ * @returns
+ */
+export const union = <const T extends CUnion>(l: T): TUnion<T> =>
+  [10, l] as any;
+
+/**
+ * Create a constant schema
+ * @param t
+ * @param nullable
+ */
+export const value = <const T extends CConst>(t: T): TConst<T> =>
+  [12, t] as any;
+
+/**
+ * Create a list type
+ */
+export const list = <const T extends IType>(
+  t: T,
+  minLen?: number | null,
+  maxLen?: number,
+): TList<T> => [14, t, minLen, maxLen] as any;
+
+/**
+ * Create a record type
+ * @param required - Required props
+ * @param optional - Optional props
+ */
+export const record = <
+  Required extends TypeRecord | null,
+  Optional extends TypeRecord = {},
+>(
+  required: Required,
+  optional?: Optional,
+): TRecord<Required extends null ? {} : Required, Optional> =>
+  [16, required, optional] as any;
+
+/**
+ * Create a tuple type
+ * @param t
+ */
+export const tuple = <T extends CTuple>(t: T): TTuple<T> => [18, t] as any;
+
+/**
+ * Create a tagged union type
+ * @param tag
+ * @param map
+ */
+export const tag = <const I extends string, T extends TypeRecord>(
+  tag: I,
+  map: T,
+): TTag<I, T> => [20, tag, map] as any;
+
+/**
+ * Create a reference to a type
+ * @returns
+ */
+export const ref = <const T extends string>(t: T): TRef<T> => [22, t] as any;
+
+/**
+ * Reference to the type of the upper scope
+ */
+export const self: TRef<_ref> = [22] as any;
+
+interface FScope {
+  <
+    const T extends IType,
+    const R extends {
+      [K in Exclude<T[_ref], _ref>]?: IType;
+    },
+  >(
+    t: T,
+    r: R,
+  ): TScope<T, R>;
+
+  <const T extends IType>(t: T): TScope<T, {}>;
+}
+/**
+ * Resolve some unresolved references of a type
+ */
+export const scope: FScope = ((t: any, r: any) => [24, t, r]) as any;
