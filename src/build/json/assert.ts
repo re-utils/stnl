@@ -54,10 +54,10 @@ export const __compile = (
   const wrapped = isNil || optional;
   if (id === 0) str += 'Number.isInteger(' + i + ')' + __compileLimits(t, 1, i);
   else if (id === 2)
-    str += 'typeof ' + i + '==="number"' + +__compileLimits(t, 1, i);
-  else if (id === 4) {
+    str += 'typeof ' + i + '==="number"' + __compileLimits(t, 1, i);
+  else if (id === 4)
     str += 'typeof ' + i + '==="string"' + __compileLimits(t, 1, i);
-  } else if (id === 6) str += 'typeof ' + i + '==="boolean"';
+  else if (id === 6) str += 'typeof ' + i + '==="boolean"';
   else if (id === 8) str += i + '!==void 0';
   else if (id === 10) {
     // @ts-ignore
