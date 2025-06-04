@@ -1,4 +1,4 @@
-import { build, t } from 'stnl';
+import { build, l, t } from 'stnl';
 
 const A = t.scope(
   t.record({
@@ -9,7 +9,7 @@ const A = t.scope(
   { x: t.int },
 );
 
-export const B = t.scope(t.list(A), { y: t.string });
+export const B = t.scope(t.list(A), { y: l.string(l.maxLen(9)) });
 export type B = t.TInfer<typeof B>;
 
 console.log(build.json.assert.code(B));

@@ -10,7 +10,7 @@ const __compileLimits = (
   // @ts-ignore
   while (start < arr.length) {
     // @ts-ignore
-    const limit = arr[start];
+    const limit = arr[start++];
 
     const id = limit[0];
     str +=
