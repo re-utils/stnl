@@ -151,7 +151,7 @@ const user = t.scope(
   t.record({
     name: t.ref('name')
   }),
-  { name: t.limit(t.string, 3, 16) }
+  { name: t.string }
 };
 ```
 
@@ -181,8 +181,8 @@ import { build } from 'stnl';
 ### Assert JSON
 ```ts
 const schema = t.record({
-  name: t.limit(t.string, 3, 16),
-  code: t.limit(t.string, 8, 32)
+  name: l.string(l.minLen(3), l.maxLen(16)),
+  code: l.string(l.minLen(8), l.maxLen(32))
 });
 
 // Build to a function
@@ -198,8 +198,8 @@ if (isUser(user)) {
 For code injection to other functions:
 ```ts
 const schema = t.record({
-  name: t.limit(t.string, 3, 16),
-  code: t.limit(t.string, 8, 32)
+  name: l.string(l.minLen(3), l.maxLen(16)),
+  code: l.string(l.minLen(8), l.maxLen(32))
 });
 
 // Build to code
