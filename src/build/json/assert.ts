@@ -178,13 +178,16 @@ export const __compile = (
  */
 export const code = (t: TLoadedType): string => {
   const deps: string[] = [];
-  const str = __compile(t, 'o', deps, false);
+  const str = 'return o=>' + __compile(t, 'o', deps, false);
 
-  let res = '';
-  for (let i = 0; i < deps.length; i++)
-    res += (i === 0 ? 'var d' : ',d') + (i + 1) + '=' + deps[i];
+  if (deps.length > 0) {
+    let res = '';
+    for (let i = 0; i < deps.length; i++)
+      res += (i === 0 ? 'var d' : ',d') + (i + 1) + '=' + deps[i];
+    return res + ';' + str;
+  }
 
-  return res + ';return o=>' + str;
+  return str;
 };
 
 /**

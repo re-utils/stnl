@@ -3,7 +3,7 @@ A simple type validator built for performance.
 ## Features
 - Types work across languages
 - Efficient representation format
-- Fast compilation types
+- Fast compilation time
 
 ## Builder
 `stnl` schema builder.
@@ -170,4 +170,38 @@ type Node = t.TInfer<typeof node>;
 const int_node = t.scope(node, {
   type: t.int
 });
+```
+
+## Builders
+`stnl` schema builders.
+```ts
+import { build } from 'stnl';
+```
+
+### Assert JSON
+```ts
+const schema = t.record({
+  name: t.limit(t.string, 3, 16),
+  code: t.limit(t.string, 8, 32)
+});
+
+// Build to a function
+const isUser = build.json.assert.compile(schema);
+
+// Usage:
+if (isUser(user)) {
+  console.log('Name', user.name);
+  console.log('Code', user.code);
+}
+```
+
+For code injection to other functions:
+```ts
+const schema = t.record({
+  name: t.limit(t.string, 3, 16),
+  code: t.limit(t.string, 8, 32)
+});
+
+// Build to code
+console.log(build.json.assert.code(schema));
 ```
