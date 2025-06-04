@@ -241,7 +241,7 @@ export const self: TRef<_ref> = [22] as any;
 /**
  * Nullable reference to the type of the upper scope
  */
-export const nullable_self: ToNullable<TRef<_ref>> = [22] as any;
+export const nullable_self: ToNullable<TRef<_ref>> = [23] as any;
 
 interface FScope {
   <

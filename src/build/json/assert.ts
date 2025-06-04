@@ -1,6 +1,9 @@
 import type { TInfer, TLoadedType } from '../../type.js';
 
-export const compileProc = (
+/**
+ * @private
+ */
+export const __compile = (
   t: TLoadedType,
   i: string,
   deps: string[],
@@ -71,10 +74,11 @@ export const compileProc = (
       (t[2] == null ? '' : '&&' + i + '.length>=' + t[2]) +
       // @ts-ignore Max
       (t[3] == null ? '' : '&&' + i + '.length<=' + t[3]) +
-      '&&' + i +
+      '&&' +
+      i +
       '.every(d' +
       // @ts-ignore Compile item
-      deps.push('o=>' + compileProc(t[1], 'o', deps, false)) +
+      deps.push('o=>' + __compile(t[1], 'o', deps, false)) +
       ')';
   else if (id === 16) {
     str += (isNil ? '' : i + '!==null&&') + 'typeof ' + i + '==="object"';
@@ -82,7 +86,7 @@ export const compileProc = (
     // @ts-ignore Required
     for (const key in t[1]) {
       // @ts-ignore Required
-      str += '&&' + compileProc(t[1][key], i + '.' + key, deps, false);
+      str += '&&' + __compile(t[1][key], i + '.' + key, deps, false);
     }
 
     // @ts-ignore Optional
@@ -90,7 +94,7 @@ export const compileProc = (
       // @ts-ignore Optional
       for (const key in t[2]) {
         // @ts-ignore Optional
-        str += '&&' + compileProc(t[2][key], i + '.' + key, deps, true);
+        str += '&&' + __compile(t[2][key], i + '.' + key, deps, true);
       }
   } else if (id === 18) {
     // @ts-ignore
@@ -98,7 +102,7 @@ export const compileProc = (
     str += 'Array.isArray(' + i + ')&&' + i + '.length===' + list.length;
 
     for (let j = 0; j < list.length; j++)
-      str += '&&' + compileProc(list[j], i + '[' + j + ']', deps, false);
+      str += '&&' + __compile(list[j], i + '[' + j + ']', deps, false);
   } else if (id === 20) {
     str += (isNil ? '' : i + '!==null&&') + 'typeof ' + i + '==="object"&&(';
     // @ts-ignore Tag
@@ -117,7 +121,7 @@ export const compileProc = (
           str += '&&';
         }
         // @ts-ignore Required
-        str += compileProc(t[1][key], i + '.' + key, deps, false);
+        str += __compile(t[1][key], i + '.' + key, deps, false);
       }
 
       // @ts-ignore Optional
@@ -129,7 +133,7 @@ export const compileProc = (
             str += '&&';
           }
           // @ts-ignore Optional
-          str += compileProc(t[2][key], i + '.' + key, deps, true);
+          str += __compile(t[2][key], i + '.' + key, deps, true);
         }
 
       str += ':';
@@ -149,37 +153,44 @@ export const compileProc = (
       if (t[2] != null)
         // @ts-ignore Scope deps
         for (const key in t[2]) {
-          // @ts-ignore Scope deps
-          scope += key + '=o=>' + compileProc(t[2][key], 'o', scopeDeps, false) + ',f';
+          scope +=
+            // @ts-ignore Scope deps
+            key + '=o=>' + __compile(t[2][key], 'o', scopeDeps, false) + ',f';
         }
 
       // @ts-ignore Scope main type
-      scope += '=o=>' + compileProc(t[1], 'o', scopeDeps, false);
+      scope += '=o=>' + __compile(t[1], 'o', scopeDeps, false);
 
       // Load scope dependencies
       for (let i = 0; i < scopeDeps.length; i++)
         scope += ',d' + (i + 1) + '=' + scopeDeps[i];
     }
 
-    str += 'd' + deps.push(
-      scope + ';return f})'
-    ) + '(' + i + ')';
+    str += 'd' + deps.push(scope + ';return f})') + '(' + i + ')';
   }
 
   return wrapped ? str + ')' : str;
 };
 
-export const compile = <T extends TLoadedType>(t: T): (o: any) => o is TInfer<T> => {
+/**
+ * Get the compiled assertion code of a schema
+ * @param t
+ */
+export const code = (t: TLoadedType): string => {
   const deps: string[] = [];
-
-  const str = compileProc(t, 'o', deps, false);
+  const str = __compile(t, 'o', deps, false);
 
   let res = '';
-  for (let i = 0; i < deps.length; i++) {
+  for (let i = 0; i < deps.length; i++)
     res += (i === 0 ? 'var d' : ',d') + (i + 1) + '=' + deps[i];
-  }
 
-  console.log(res + ';return o=>' + str)
+  return res + ';return o=>' + str;
+};
 
-  return Function(res + ';return o=>' + str)();
-}
+/**
+ * Get the compiled assertion function of a schema
+ * @param t
+ */
+export const compile = <T extends TLoadedType>(
+  t: T,
+): ((o: any) => o is TInfer<T>) => Function(code(t))();

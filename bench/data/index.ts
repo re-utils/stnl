@@ -29,14 +29,12 @@ const lastNames = [
   'Anderson',
 ];
 const randname = () => randpick(firstNames) + ' ' + randpick(lastNames);
-const randbool = () => Math.random() > 0.5;
 
 {
   interface User {
     name: string;
     id: number; // integer
     friends: {
-      type: 0 | 1 | 2;
       id: number;
     }[];
   }
@@ -45,7 +43,6 @@ const randbool = () => Math.random() > 0.5;
     name: randname(),
     id: randint(1, 1000),
     friends: new Array(randint(2, 20)).fill(0).map(() => ({
-      type: randint(0, 2) as 0 | 1 | 2,
       id: randint(1, 1000),
     })),
   });
@@ -66,10 +63,6 @@ const randbool = () => Math.random() > 0.5;
     (user) => {
       // @ts-ignore
       user.friends = 0;
-    },
-    (user) => {
-      // @ts-ignore
-      delete randpick(user.friends).type;
     },
     (user) => {
       // @ts-ignore

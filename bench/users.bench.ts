@@ -1,6 +1,12 @@
 import { bench, do_not_optimize, run, summary } from 'mitata';
 import users from './data/users.json';
 
+import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { TypeSystemPolicy } from '@sinclair/typebox/system';
+import { Type } from '@sinclair/typebox';
+
+import { t, build } from 'stnl';
+
 summary(() => {
   const setup = (label: string, matcher: (o: any) => boolean) => {
     // @ts-ignore
@@ -12,26 +18,37 @@ summary(() => {
     });
   };
 
-  setup(
-    'fast inlining',
-    (o: any) =>
-      Array.isArray(o.friends) &&
-      o.friends.every(
-        (o: any) =>
-          (o.type === 0 || o.type === 1 || o.type === 2) &&
-          Number.isInteger(o.id),
-      ),
-  );
-
   {
-    const subMatch = (o: any) =>
-      (o.type === 0 || o.type === 1 || o.type === 2) && Number.isInteger(o.id);
+    TypeSystemPolicy.AllowArrayObject = true;
+    TypeSystemPolicy.AllowNaN = true;
 
-    setup(
-      'partial inlining',
-      (o: any) => Array.isArray(o.friends) && o.friends.every(subMatch),
-    );
+    const schema = Type.Object({
+      name: Type.String(),
+      id: Type.Integer(),
+      friends: Type.Array(
+        Type.Object({
+          id: Type.Integer(),
+        }),
+      ),
+    });
+
+    setup('typebox', Function(TypeCompiler.Code(schema, []))());
   }
+
+  setup(
+    'stnl',
+    build.json.assert.compile(
+      t.record({
+        name: t.string,
+        id: t.int,
+        friends: t.list(
+          t.record({
+            id: t.int,
+          }),
+        ),
+      }),
+    ),
+  );
 });
 
 run();

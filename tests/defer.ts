@@ -12,4 +12,4 @@ const A = t.scope(
 export const B = t.scope(t.list(A), { y: t.string });
 export type B = t.TInfer<typeof B>;
 
-console.log(build.json.assert.compile(B));
+console.log(build.json.assert.code(B));
