@@ -1,5 +1,5 @@
-import { bench, do_not_optimize, run, summary } from "mitata";
-import users from "./data/users.json";
+import { bench, do_not_optimize, run, summary } from 'mitata';
+import users from './data/users.json';
 
 summary(() => {
   const setup = (label: string, matcher: (o: any) => boolean) => {
@@ -12,25 +12,9 @@ summary(() => {
     });
   };
 
-  {
-    const subMatch = (o: any) =>
-      (o.type === 0 || o.type === 1 || o.type === 2) && Number.isInteger(o.id);
-
-    setup(
-      "partial inlining",
-      (o: any) =>
-        Number.isInteger(o.id) &&
-        typeof o.name === "string" &&
-        Array.isArray(o.friends) &&
-        o.friends.every(subMatch),
-    );
-  }
-
   setup(
-    "fast inlining",
+    'fast inlining',
     (o: any) =>
-      Number.isInteger(o.id) &&
-      typeof o.name === "string" &&
       Array.isArray(o.friends) &&
       o.friends.every(
         (o: any) =>
@@ -38,6 +22,16 @@ summary(() => {
           Number.isInteger(o.id),
       ),
   );
+
+  {
+    const subMatch = (o: any) =>
+      (o.type === 0 || o.type === 1 || o.type === 2) && Number.isInteger(o.id);
+
+    setup(
+      'partial inlining',
+      (o: any) => Array.isArray(o.friends) && o.friends.every(subMatch),
+    );
+  }
 });
 
 run();

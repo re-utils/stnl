@@ -1,4 +1,4 @@
-import { t } from 'stnl';
+import { build, t } from 'stnl';
 
 const A = t.scope(
   t.record({
@@ -12,4 +12,4 @@ const A = t.scope(
 export const B = t.scope(t.list(A), { y: t.string });
 export type B = t.TInfer<typeof B>;
 
-console.log(JSON.stringify(B, null, 2));
+console.log(build.json.assert.compile(B));
