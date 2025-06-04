@@ -166,7 +166,7 @@ export const __compile = (
         scope += ',d' + (i + 1) + '=' + scopeDeps[i];
     }
 
-    str += 'd' + deps.push(scope + ';return f})') + '(' + i + ')';
+    str += 'd' + deps.push(scope + ';return f})()') + '(' + i + ')';
   }
 
   return wrapped ? str + ')' : str;
