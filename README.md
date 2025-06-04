@@ -172,8 +172,8 @@ const int_node = t.scope(node, {
 });
 ```
 
-## Builders
-`stnl` schema builders.
+## Compilers
+`stnl` schema compilers.
 ```ts
 import { build } from 'stnl';
 ```
