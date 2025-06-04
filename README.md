@@ -8,7 +8,9 @@ A simple type validator built for performance.
 ## Builder
 `stnl` schema builder.
 ```ts
-import { t } from 'stnl';
+import { t, l } from 'stnl';
+// or
+import { type, limit } from 'stnl';
 ```
 
 ### Type inference
@@ -24,29 +26,27 @@ type T = t.TInfer<typeof schema>;
 - `t.int`: integer
 - `t.float`: floating-point number
 - `t.string`: string
-- `t.nullable_string`: string or `null`
 - `t.bool`: boolean
 - `t.any`: any type
 
-To set integer/float range or string size limit, use `t.limit`:
 ```ts
-// value >= 1
-t.limit(t.int, 1);
+t.int; // integer
+t.float; // floating-point number
+t.string; // strings
+t.bool; // boolean
+t.any; // any type
 
-// value <= 10
-t.limit(t.int, null, 10);
+l.int(l.min(5)); // integer >= 5
+l.int(l.max(9)); // integer <= 9
+l.int(l.min(5), l.max(9)); // 5 <= integer <= 9
 
-// 1 <= value <= 10
-t.limit(t.float, 1, 10);
+l.float(l.min(5)); // float >= 5
+l.float(l.max(9)); // float <= 9
+l.float(l.min(5), l.max(9)); // 5 <= float <= 9
 
-// str.length >= 8
-t.limit(t.string, 8);
-
-// str.length <= 32
-t.limit(t.string, null, 32);
-
-// 8 <= str.length <= 32
-t.limit(t.string, 8, 32);
+l.string(l.minLen(5)); // string.length >= 5
+l.string(l.maxLen(9)); // string.length <= 9
+l.string(l.minLen(5), l.maxLen(9)); // 5 <= string.length <= 9
 ```
 
 ### Unions
@@ -74,13 +74,13 @@ t.value(true);
 t.list(t.int);
 
 // A list of string with list.length >= 1
-t.list(t.string, 1);
+t.list(t.string, l.minLen(1));
 
 // A list of float with list.length <= 10
-t.list(t.float, 0, 10);
+t.list(t.float, l.maxLen(10));
 
 // A list of float with 1 <= list.length <= 10
-t.list(t.float, 1, 10);
+t.list(t.float, l.minLen(1), l.maxLen(10));
 ```
 
 ### Records

@@ -1,5 +1,36 @@
 import type { TInfer, TLoadedType } from '../../type.js';
 
+const __compileLimits = (
+  arr: TLoadedType,
+  start: number,
+  i: string,
+): string => {
+  let str = '';
+
+  // @ts-ignore
+  while (start < arr.length) {
+    // @ts-ignore
+    const limit = arr[start];
+
+    const id = limit[0];
+    str +=
+      '&&' +
+      (id === 0
+        ? i + '>=' + limit[1]
+        : id === 1
+          ? i + '<=' + limit[1]
+          : id === 2
+            ? i + '.length>=' + limit[1]
+            : id === 3
+              ? i + '.length<=' + limit[1]
+              : id === 4
+                ? i + '.length===' + limit[1]
+                : 'true');
+  }
+
+  return str;
+};
+
 /**
  * @private
  */
@@ -21,33 +52,11 @@ export const __compile = (
   } else if (optional) str += '(' + i + '===void 0||';
 
   const wrapped = isNil || optional;
-  if (id === 0)
-    str +=
-      'Number.isInteger(' +
-      i +
-      ')' +
-      // @ts-ignore Min
-      (t[1] == null ? '' : '&&' + i + '>=' + t[1]) +
-      // @ts-ignore Max
-      (t[1] == null ? '' : '&&' + i + '<=' + t[2]);
+  if (id === 0) str += 'Number.isInteger(' + i + ')' + __compileLimits(t, 1, i);
   else if (id === 2)
-    str +=
-      'typeof ' +
-      i +
-      '==="number"' +
-      // @ts-ignore Min
-      (t[1] == null ? '' : '&&' + i + '>=' + t[1]) +
-      // @ts-ignore Max
-      (t[1] == null ? '' : '&&' + i + '<=' + t[2]);
+    str += 'typeof ' + i + '==="number"' + +__compileLimits(t, 1, i);
   else if (id === 4) {
-    str +=
-      'typeof ' +
-      i +
-      '==="string"' +
-      // @ts-ignore Min
-      (t[1] == null ? '' : '&&' + i + '.length>=' + t[1]) +
-      // @ts-ignore Max
-      (t[1] == null ? '' : '&&' + i + '.length<=' + t[2]);
+    str += 'typeof ' + i + '==="string"' + __compileLimits(t, 1, i);
   } else if (id === 6) str += 'typeof ' + i + '==="boolean"';
   else if (id === 8) str += i + '!==void 0';
   else if (id === 10) {
@@ -70,10 +79,7 @@ export const __compile = (
       'Array.isArray(' +
       i +
       ')' +
-      // @ts-ignore Min
-      (t[2] == null ? '' : '&&' + i + '.length>=' + t[2]) +
-      // @ts-ignore Max
-      (t[3] == null ? '' : '&&' + i + '.length<=' + t[3]) +
+      __compileLimits(t, 1, i) +
       '&&' +
       i +
       '.every(d' +

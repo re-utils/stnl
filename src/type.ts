@@ -1,3 +1,5 @@
+import type { LLen } from './limit.js';
+
 type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
@@ -30,6 +32,7 @@ type InferTypeList<T extends IType[]> = T extends [
   : [];
 
 interface NullableMap {
+  4: 5;
   10: 11;
   12: 13;
   14: 15;
@@ -47,7 +50,6 @@ type ToNullable<T extends IType<keyof NullableMap>> = IType<
 export type TInt = IType<0, number, never>;
 export type TFloat = IType<2, number, never>;
 export type TString = IType<4, string, never>;
-export type TNilString = IType<5, string | null, never>;
 export type TBool = IType<6, boolean, never>;
 export type TAny = IType<8, unknown, never>;
 
@@ -130,19 +132,10 @@ export type TScope<
   Exclude<T[_ref], _ref | keyof R>
 >;
 
-// Type passable to limit()
-declare const _lim: unique symbol;
-interface TLimitable {
-  [_lim]: null;
-}
-
 // Primitives
-export const int: TInt & TLimitable = [0] as any;
-export const float: TFloat & TLimitable = [2] as any;
-
-export const string: TString & TLimitable = [4] as any;
-export const nullable_string: TNilString & TLimitable = [5] as any;
-
+export const int: TInt = [0] as any;
+export const float: TFloat = [2] as any;
+export const string: TString = [4] as any;
 export const bool: TBool = [6] as any;
 export const any: TAny = [8] as any;
 
@@ -156,18 +149,6 @@ export const nullable = <
 >(
   t: T,
 ): ToNullable<T> => (t as any as any[]).with(0, t[0] + 1) as any;
-
-/**
- * Limit length range for string or range for number
- * @param t - The type to limit
- * @param min
- * @param max
- */
-export const limit = <const R extends IType>(
-  t: R & TLimitable,
-  min: number | null,
-  max?: number,
-): R => [t[0], min, max] as any;
 
 /**
  * Create an union schema
@@ -189,10 +170,8 @@ export const value = <const T extends CConst>(t: T): TConst<T> =>
  * Create a list type
  */
 export const list = <const T extends IType>(
-  t: T,
-  minLen?: number,
-  maxLen?: number,
-): TList<T> => [14, t, minLen, maxLen] as any;
+  ...args: [type: T, ...LLen[]]
+): TList<T> => [14, ...args] as any;
 
 /**
  * Create a record type
