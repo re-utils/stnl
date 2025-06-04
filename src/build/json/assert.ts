@@ -20,9 +20,9 @@ const __compileLimits = (
         : id === 1
           ? i + '<=' + limit[1]
           : id === 2
-            ? i + '.length>=' + limit[1]
+            ? i + '.length>' + (limit[1] - 1)
             : id === 3
-              ? i + '.length<=' + limit[1]
+              ? i + '.length<' + (limit[1] + 1)
               : id === 4
                 ? i + '.length===' + limit[1]
                 : 'true');
@@ -79,7 +79,7 @@ export const __compile = (
       'Array.isArray(' +
       i +
       ')' +
-      __compileLimits(t, 1, i) +
+      __compileLimits(t, 2, i) +
       '&&' +
       i +
       '.every(d' +
