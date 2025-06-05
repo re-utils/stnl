@@ -23,7 +23,7 @@ export type TLoadedType = IType<number, any, never>;
 // Userland infer type
 export type TInfer<T extends TLoadedType> = T[_];
 
-type TypeRecord = Record<string, IType>;
+type TypeDict = Record<string, IType>;
 type InferTypeList<T extends IType[]> = T extends [
   infer A extends IType,
   ...infer B extends IType[],
@@ -61,9 +61,9 @@ type CConst = number | string | boolean;
 export type TConst<T extends CConst> = IType<12, T, never>;
 
 export type TList<T extends IType> = IType<14, T[_][], T[_ref]>;
-export type TRecord<
-  Required extends TypeRecord,
-  Optional extends TypeRecord,
+export type TDict<
+  Required extends TypeDict,
+  Optional extends TypeDict,
 > = IType<
   16,
   Prettify<
@@ -83,7 +83,7 @@ export type TTuple<T extends CTuple> = IType<
   T[number][_ref]
 >;
 
-export type TTag<I extends string, T extends TypeRecord> = IType<
+export type TTag<I extends string, T extends TypeDict> = IType<
   20,
   Prettify<
     {
@@ -174,17 +174,17 @@ export const list = <const T extends IType>(
 ): TList<T> => [14, ...args] as any;
 
 /**
- * Create a record type
+ * Create a dict type
  * @param required - Required props
  * @param optional - Optional props
  */
-export const record = <
-  Required extends TypeRecord | null,
-  Optional extends TypeRecord = {},
+export const dict = <
+  Required extends TypeDict | null,
+  Optional extends TypeDict = {},
 >(
   required: Required,
   optional?: Optional,
-): TRecord<Required extends null ? {} : Required, Optional> =>
+): TDict<Required extends null ? {} : Required, Optional> =>
   [16, required, optional] as any;
 
 /**
@@ -200,7 +200,7 @@ export const tuple = <T extends CTuple>(t: T): TTuple<T> => [18, t] as any;
  */
 export const tag = <
   const I extends string,
-  T extends Record<string, TRecord<TypeRecord, TypeRecord>>,
+  T extends Record<string, TDict<TypeDict, TypeDict>>,
 >(
   tag: I,
   map: T,

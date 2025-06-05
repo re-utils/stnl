@@ -1,6 +1,10 @@
 import type { TInfer, TLoadedType } from '../../type.js';
+import { optimizeDirectCall } from '../utils.js';
 
-const __compileLimits = (
+/**
+ * @private
+ */
+export const __compileLimits = (
   arr: TLoadedType,
   start: number,
   i: string,
@@ -30,6 +34,11 @@ const __compileLimits = (
 
   return str;
 };
+
+/**
+ * @private
+ */
+export const __compileToFn = (t: TLoadedType, deps: string[]): string => 'o=>' + __compile(t, 'o', deps, false);
 
 /**
  * @private
@@ -84,16 +93,18 @@ export const __compile = (
       i +
       '.every(d' +
       // @ts-ignore Compile item
-      deps.push('o=>' + __compile(t[1], 'o', deps, false)) +
+      deps.push(optimizeDirectCall(__compileToFn(t[1], deps))) +
       ')';
   else if (id === 16) {
     str += (isNil ? '' : i + '!==null&&') + 'typeof ' + i + '==="object"';
 
     // @ts-ignore Required
-    for (const key in t[1]) {
+    if (t[1] != null)
       // @ts-ignore Required
-      str += '&&' + __compile(t[1][key], i + '.' + key, deps, false);
-    }
+      for (const key in t[1]) {
+        // @ts-ignore Required
+        str += '&&' + __compile(t[1][key], i + '.' + key, deps, false);
+      }
 
     // @ts-ignore Optional
     if (t[2] != null)
@@ -148,10 +159,9 @@ export const __compile = (
     str += 'false)';
   } else if (id === 22)
     // @ts-ignore Check for self ref
-    str += (t.length === 1 ? 'f' : 'f' + t[1]) + '(' + i + ')';
+    str += (t.length === 1 ? 'd' : 'd' + t[1]) + '(' + i + ')';
   else if (id === 24) {
-    let scope = '(()=>{var f';
-
+    let scope = '(()=>{var ';
     {
       const scopeDeps: string[] = [];
 
@@ -161,18 +171,16 @@ export const __compile = (
         for (const key in t[2]) {
           scope +=
             // @ts-ignore Scope deps
-            key + '=o=>' + __compile(t[2][key], 'o', scopeDeps, false) + ',f';
+            'd' + key + '=' + __compileToFn(t[2][key], scopeDeps) + ',';
         }
 
       // @ts-ignore Scope main type
-      scope += '=o=>' + __compile(t[1], 'o', scopeDeps, false);
-
-      // Load scope dependencies
+      const main = optimizeDirectCall(__compileToFn(t[1], scopeDeps));
       for (let i = 0; i < scopeDeps.length; i++)
-        scope += ',d' + (i + 1) + '=' + scopeDeps[i];
+        scope += 'd' + (i + 1) + '=' + scopeDeps[i] + ',';
+      scope += 'd=' + main;
     }
-
-    str += 'd' + deps.push(scope + ';return f})()') + '(' + i + ')';
+    str += 'd' + deps.push(scope + ';return d})()') + '(' + i + ')';
   }
 
   return wrapped ? str + ')' : str;
@@ -184,7 +192,7 @@ export const __compile = (
  */
 export const code = (t: TLoadedType): string => {
   const deps: string[] = [];
-  const str = 'return o=>' + __compile(t, 'o', deps, false);
+  const str = 'return ' + optimizeDirectCall(__compileToFn(t, deps));
 
   if (deps.length > 0) {
     let res = '';

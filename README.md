@@ -83,10 +83,10 @@ t.list(t.float, l.maxLen(10));
 t.list(t.float, l.minLen(1), l.maxLen(10));
 ```
 
-### Records
+### Objects
 ```ts
 // { id: number, name: string, display_names?: string[] }
-t.record(
+t.dict(
   // Required properties
   {
     id: t.int,
@@ -112,10 +112,10 @@ t.tuple([
 ```ts
 // { role: 'admin', id: string } | { role: 'user', name: string }
 t.tag('role', {
-  admin: t.record({
+  admin: t.dict({
     id: t.string
   }),
-  user: t.record({
+  user: t.dict({
     name: t.string
   })
 });
@@ -126,7 +126,7 @@ To make a schema accepts `null`:
 ```ts
 // { name: string, id: number } | null
 t.nullable(
-  t.record({
+  t.dict({
     name: t.string,
     id: t.int
   })
@@ -138,7 +138,7 @@ Recursive types with scope:
 ```ts
 // interface Node { value: string, next: Node | null }
 const node = t.scope(
-  t.record(
+  t.dict(
     { value: t.string },
     { next: t.self } // Reference to the root type of the scope
   )
@@ -148,7 +148,7 @@ const node = t.scope(
 References defined types in scope:
 ```ts
 const user = t.scope(
-  t.record({
+  t.dict({
     name: t.ref('name')
   }),
   { name: t.string }
@@ -158,7 +158,7 @@ const user = t.scope(
 Generics with scope:
 ```ts
 // node is an unresolved type
-const node = t.record(
+const node = t.dict(
   { value: t.ref('type') },
   { next: t.self }
 );
@@ -180,7 +180,7 @@ import { build } from 'stnl';
 
 ### Assert JSON
 ```ts
-const schema = t.record({
+const schema = t.dict({
   name: l.string(l.minLen(3), l.maxLen(16)),
   code: l.string(l.minLen(8), l.maxLen(32))
 });
@@ -197,7 +197,7 @@ if (isUser(user)) {
 
 For code injection to other functions:
 ```ts
-const schema = t.record({
+const schema = t.dict({
   name: l.string(l.minLen(3), l.maxLen(16)),
   code: l.string(l.minLen(8), l.maxLen(32))
 });
