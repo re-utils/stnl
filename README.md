@@ -214,6 +214,5 @@ if (isUser(user))
 
 For code injection to other functions:
 ```ts
-// Build to code
 console.log(build.json.stringify.code(schema));
 ```
