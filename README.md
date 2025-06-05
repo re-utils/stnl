@@ -175,20 +175,24 @@ const int_node = t.scope(node, {
 ## Compilers
 `stnl` schema compilers.
 ```ts
-import { build } from 'stnl';
-```
+import { build, t, l } from 'stnl';
 
-### Assert JSON
-```ts
+// Used for examples below
 const schema = t.dict({
   name: l.string(l.minLen(3), l.maxLen(16)),
   code: l.string(l.minLen(8), l.maxLen(32))
 });
 
-// Build to a function
-const isUser = build.json.assert.compile(schema);
+const user = {
+  name: 'reve',
+  code: '1234567890'
+};
+```
 
-// Usage:
+### Assert JSON
+To compile a schema to a JSON type assertion function:
+```ts
+const isUser = build.json.assert.compile(schema);
 if (isUser(user)) {
   console.log('Name', user.name);
   console.log('Code', user.code);
@@ -197,11 +201,19 @@ if (isUser(user)) {
 
 For code injection to other functions:
 ```ts
-const schema = t.dict({
-  name: l.string(l.minLen(3), l.maxLen(16)),
-  code: l.string(l.minLen(8), l.maxLen(32))
-});
-
-// Build to code
 console.log(build.json.assert.code(schema));
+```
+
+### Stringify JSON
+To compile a schema to an optimized JSON stringifier function:
+```ts
+const stringifyUser = build.json.stringify.compile(schema);
+if (isUser(user))
+  console.log(stringifyUser(user) === JSON.stringify(user)); // true
+```
+
+For code injection to other functions:
+```ts
+// Build to code
+console.log(build.json.stringify.code(schema));
 ```
