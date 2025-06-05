@@ -61,10 +61,7 @@ type CConst = number | string | boolean;
 export type TConst<T extends CConst> = IType<12, T, never>;
 
 export type TList<T extends IType> = IType<14, T[_][], T[_ref]>;
-export type TDict<
-  Required extends TypeDict,
-  Optional extends TypeDict,
-> = IType<
+export type TDict<Required extends TypeDict, Optional extends TypeDict> = IType<
   16,
   Prettify<
     {

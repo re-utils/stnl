@@ -1,7 +1,8 @@
 import type { TInfer, TLoadedType } from '../../type.js';
 import { optimizeDirectCall } from '../utils.js';
 
-const __compileKey = (k: string) => JSON.stringify(JSON.stringify(k) + ':');
+const __compileKey = (prefix: string, k: string) =>
+  JSON.stringify(prefix + JSON.stringify(k) + ':');
 
 /**
  * @private
@@ -16,8 +17,7 @@ const __compileDict = (i: string, deps: string[], t: any[]) => {
   if (t[1] != null)
     for (const key in t[1]) {
       str +=
-        (noRequired ? '"{"+' : '","+') +
-        __compileKey(key) +
+        __compileKey(noRequired ? '{' : ',', key) +
         '+' +
         __compile(t[1][key], i + '.' + key, deps, false) +
         '+';
@@ -34,17 +34,19 @@ const __compileDict = (i: string, deps: string[], t: any[]) => {
           'if(' +
           prop +
           '===void 0){_+=(i?"{":",")+' +
-          __compileKey(key) +
+          __compileKey('', key) +
           '+' +
           __compile(t[2][key], i + '.' + key, deps, true) +
           ';i=false}';
       }
     str += 'd' + deps.push(scope + 'return _}') + '(o)';
   } else if (t[2] != null)
-    for (const key in t[2]) {
-      // @ts-ignore Optional
-      str += '","+' + __compile(t[2][key], i + '.' + key, deps, true) + '+';
-    }
+    for (const key in t[2])
+      str +=
+        __compileKey(noRequired ? '{' : ',', key) +
+        '+' +
+        __compile(t[2][key], i + '.' + key, deps, true) +
+        '+';
 
   return str + '"}"';
 };
@@ -95,8 +97,7 @@ export const __compile = (
           '}return _+"]"}',
       ) +
       '(o)';
-  else if (id === 16)
-    str += __compileDict(i, deps, t as any);
+  else if (id === 16) str += __compileDict(i, deps, t as any);
   else if (id === 18) {
     // @ts-ignore
     for (let j = 0; j < t[1].length; j++)

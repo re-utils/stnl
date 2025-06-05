@@ -38,7 +38,8 @@ export const __compileLimits = (
 /**
  * @private
  */
-export const __compileToFn = (t: TLoadedType, deps: string[]): string => 'o=>' + __compile(t, 'o', deps, false);
+export const __compileToFn = (t: TLoadedType, deps: string[]): string =>
+  'o=>' + __compile(t, 'o', deps, false);
 
 /**
  * @private

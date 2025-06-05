@@ -10,6 +10,9 @@ export const schema = <const T extends t.TLoadedType>(
   const stringify = build.json.stringify.compile(s);
 
   return (o) => {
-    if (assert(o)) console.log('Result:', JSON.parse(stringify(o)));
+    if (assert(o)) {
+      console.log('Result:', stringify(o));
+      JSON.parse(stringify(o));
+    }
   };
 };
