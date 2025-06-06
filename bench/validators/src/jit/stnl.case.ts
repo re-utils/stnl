@@ -15,18 +15,20 @@ export default defineCase({
         deeplyNested: t.dict({
           foo: t.string,
           num: t.float,
-          bool: t.bool
+          bool: t.bool,
         }),
-        items: t.list(t.float)
-      })
+        items: t.list(t.float),
+      }),
     ),
 
     stringify: build.json.stringify.compile(
-      t.list(t.dict({
-        name: t.string,
-        pwd: t.string,
-        id: t.list(t.float)
-      }))
+      t.list(
+        t.dict({
+          name: t.string,
+          pwd: t.string,
+          id: t.list(t.float),
+        }),
+      ),
     ),
   },
 });

@@ -163,25 +163,23 @@ export const __compile = (
     str += (t.length === 1 ? 'd' : 'd' + t[1]) + '(' + i + ')';
   else if (id === 24) {
     let scope = '(()=>{var ';
-    {
-      const scopeDeps: string[] = [];
+    const scopeDeps: string[] = [];
 
+    // @ts-ignore Scope deps
+    if (t[2] != null)
       // @ts-ignore Scope deps
-      if (t[2] != null)
-        // @ts-ignore Scope deps
-        for (const key in t[2]) {
-          scope +=
-            // @ts-ignore Scope deps
-            'd' + key + '=' + __compileToFn(t[2][key], scopeDeps) + ',';
-        }
+      for (const key in t[2]) {
+        scope +=
+          // @ts-ignore Scope deps
+          'd' + key + '=' + __compileToFn(t[2][key], scopeDeps) + ',';
+      }
 
-      // @ts-ignore Scope main type
-      const main = optimizeDirectCall(__compileToFn(t[1], scopeDeps));
-      for (let i = 0; i < scopeDeps.length; i++)
-        scope += 'd' + (i + 1) + '=' + scopeDeps[i] + ',';
-      scope += 'd=' + main;
-    }
-    str += 'd' + deps.push(scope + ';return d})()') + '(' + i + ')';
+    // @ts-ignore Scope main type
+    const main = optimizeDirectCall(__compileToFn(t[1], scopeDeps));
+    for (let i = 0; i < scopeDeps.length; i++)
+      scope += 'd' + (i + 1) + '=' + scopeDeps[i] + ',';
+
+    str += 'd' + deps.push(scope + 'd=' + main + ';return d})()') + '(' + i + ')';
   }
 
   return wrapped ? str + ')' : str;

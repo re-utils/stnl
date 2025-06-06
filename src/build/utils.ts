@@ -8,4 +8,5 @@ export const optimizeDirectCall = (s: string): string =>
     ? s.slice(3, -3)
     : s;
 
-export const stringToJSON = (s: string): string => /["\b\t\n\v\f\r\/]/.test(s) ? JSON.stringify(s) : '"' + s + '"';
+export const stringToJSON = (s: string): string =>
+  /["\b\t\n\v\f\r\/]/.test(s) ? JSON.stringify(s) : '"' + s + '"';

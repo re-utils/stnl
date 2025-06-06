@@ -2,13 +2,13 @@ import type { TInfer, TLoadedType } from '../../type.js';
 import { stringToJSON, optimizeDirectCall } from '../utils.js';
 
 const __compileKey = (prefix: string, k: string) =>
-  '\'' + prefix + stringToJSON(k) + ':\'';
+  "'" + prefix + stringToJSON(k) + ":'";
 
 /**
  * Compiler symbols
  */
 export const symbols = {
-  escapeString: 'e'
+  escapeString: 'e',
 };
 
 /**
@@ -98,14 +98,18 @@ export const __compile = (
     const id = item[0];
 
     // Joinable types can be optimized out
-    str += id === 0 || id === 2 || id === 8 || id === 10
-      ? '"["+' +  i + '.join()+"]"'
-      : 'd' +
-      deps.push('o=>{let _="";for(let i=0;i<o.length;i++)_+=(i===0?"[":",")+'+
-        __compile(item, 'o[i]', deps, false) +
-        ';return _+"]"}',
-      ) +
-      '(' + i + ')';
+    str +=
+      id === 0 || id === 2 || id === 8 || id === 10
+        ? '"["+' + i + '.join()+"]"'
+        : 'd' +
+          deps.push(
+            'o=>{let _="";for(let i=0;i<o.length;i++)_+=(i===0?"[":",")+' +
+              __compile(item, 'o[i]', deps, false) +
+              ';return _+"]"}',
+          ) +
+          '(' +
+          i +
+          ')';
   } else if (id === 16) str += __compileDict(i, deps, t as any);
   else if (id === 18) {
     // @ts-ignore
@@ -138,25 +142,23 @@ export const __compile = (
     str += (t.length === 1 ? 'd' : 'd' + t[1]) + '(' + i + ')';
   else if (id === 24) {
     let scope = '(()=>{var ';
-    {
-      const scopeDeps: string[] = [];
+    const scopeDeps: string[] = [];
 
+    // @ts-ignore Scope deps
+    if (t[2] != null)
       // @ts-ignore Scope deps
-      if (t[2] != null)
-        // @ts-ignore Scope deps
-        for (const key in t[2]) {
-          scope +=
-            // @ts-ignore Scope deps
-            'd' + key + '=' + __compileToFn(t[2][key], scopeDeps) + ',';
-        }
+      for (const key in t[2]) {
+        scope +=
+          // @ts-ignore Scope deps
+          'd' + key + '=' + __compileToFn(t[2][key], scopeDeps) + ',';
+      }
 
-      // @ts-ignore Scope main type
-      const main = optimizeDirectCall(__compileToFn(t[1], scopeDeps));
-      for (let i = 0; i < scopeDeps.length; i++)
-        scope += 'd' + (i + 1) + '=' + scopeDeps[i] + ',';
-      scope += 'd=' + main;
-    }
-    str += 'd' + deps.push(scope + ';return d})()') + '(' + i + ')';
+    // @ts-ignore Scope main type
+    const main = optimizeDirectCall(__compileToFn(t[1], scopeDeps));
+    for (let i = 0; i < scopeDeps.length; i++)
+      scope += 'd' + (i + 1) + '=' + scopeDeps[i] + ',';
+
+    str += 'd' + deps.push(scope + 'd=' + main + ';return d})()') + '(' + i + ')';
   }
 
   return wrapped ? str + ')' : str;
@@ -186,4 +188,5 @@ export const code = (t: TLoadedType): string => {
  */
 export const compile = <T extends TLoadedType>(
   t: T,
-): ((o: TInfer<T>) => string) => Function(symbols.escapeString, code(t))(stringToJSON);
+): ((o: TInfer<T>) => string) =>
+  Function(symbols.escapeString, code(t))(stringToJSON);

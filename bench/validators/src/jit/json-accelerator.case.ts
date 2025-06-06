@@ -19,7 +19,7 @@ export default defineCase({
           pwd: SanitizedString,
           id: Type.Array(Type.Number()),
         }),
-      )
+      ),
     ),
   },
 });
