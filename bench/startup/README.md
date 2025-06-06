@@ -1,8 +1,8 @@
 Benchmark startup time of JIT validators.
 ```sh
 # Run in Node
-bun tsx src/simple.ts
+bun index.ts node
 
 # Run in Bun
-bun src/simple.ts
+bun index.ts
 ```
