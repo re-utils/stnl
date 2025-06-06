@@ -1,8 +1,15 @@
 import type { TInfer, TLoadedType } from '../../type.js';
-import { optimizeDirectCall } from '../utils.js';
+import { stringToJSON, optimizeDirectCall } from '../utils.js';
 
 const __compileKey = (prefix: string, k: string) =>
-  JSON.stringify(prefix + JSON.stringify(k) + ':');
+  '\'' + prefix + stringToJSON(k) + ':\'';
+
+/**
+ * Compiler symbols
+ */
+export const symbols = {
+  escapeString: 'e'
+};
 
 /**
  * @private
@@ -39,7 +46,7 @@ const __compileDict = (i: string, deps: string[], t: any[]) => {
           __compile(t[2][key], i + '.' + key, deps, true) +
           ';i=false}';
       }
-    str += 'd' + deps.push(scope + 'return _}') + '(o)';
+    str += 'd' + deps.push(scope + 'return _}') + '(' + i + ')';
   } else if (t[2] != null)
     for (const key in t[2])
       str +=
@@ -72,32 +79,34 @@ export const __compile = (
 
   const wrapped = isNil || optional;
   if (id === 0 || id === 2 || id === 8) str += '""+' + i;
-  else if (id === 4) str += 'JSON.stringify(' + i + ')';
+  else if (id === 4) str += symbols.escapeString + '(' + i + ')';
   else if (id === 6) str += '(' + i + '?"true":"false")';
   else if (id === 10) {
     str += '(';
     // @ts-ignore Enum elements
     for (let j = 0, last = t[1].length - 1; j <= last; j++) {
       // @ts-ignore Enum elements
-      const el = JSON.stringify(t[1][j]);
+      const el = stringToJSON(t[1][j]);
       str += j === last ? el + ')' : i + '===' + el + '?' + el + ':';
     }
   } else if (id === 12)
     // @ts-ignore Constant
-    str += typeof t[1] === 'string' ? JSON.stringify(t[1]) : t[1];
-  else if (id === 14)
-    str +=
-      'd' +
-      deps.push(
-        'o=>{let _="";for(let i=0;i<' +
-          i +
-          '.length;i++){_+=(i===0?"[":",")+' +
-          // @ts-ignore
-          __compile(t[1], 'o[i]', deps, false) +
-          '}return _+"]"}',
+    str += typeof t[1] === 'string' ? stringToJSON(t[1]) : t[1];
+  else if (id === 14) {
+    // @ts-ignore
+    const item = t[1];
+    const id = item[0];
+
+    // Joinable types can be optimized out
+    str += id === 0 || id === 2 || id === 8 || id === 10
+      ? '"["+' +  i + '.join()+"]"'
+      : 'd' +
+      deps.push('o=>{let _="";for(let i=0;i<o.length;i++)_+=(i===0?"[":",")+'+
+        __compile(item, 'o[i]', deps, false) +
+        ';return _+"]"}',
       ) +
-      '(o)';
-  else if (id === 16) str += __compileDict(i, deps, t as any);
+      '(' + i + ')';
+  } else if (id === 16) str += __compileDict(i, deps, t as any);
   else if (id === 18) {
     // @ts-ignore
     for (let j = 0; j < t[1].length; j++)
@@ -122,7 +131,7 @@ export const __compile = (
       str +=
         j === last
           ? res
-          : tag + '===' + JSON.stringify(pairs[j][0]) + '?' + res + ':';
+          : tag + '===' + stringToJSON(pairs[j][0]) + '?' + res + ':';
     }
   } else if (id === 22)
     // @ts-ignore Check for self ref
@@ -177,4 +186,4 @@ export const code = (t: TLoadedType): string => {
  */
 export const compile = <T extends TLoadedType>(
   t: T,
-): ((o: TInfer<T>) => string) => Function(code(t))();
+): ((o: TInfer<T>) => string) => Function(symbols.escapeString, code(t))(stringToJSON);

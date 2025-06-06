@@ -1,8 +1,0 @@
-{
-  "scripts": {
-    "data": "bun data/index.ts"
-  },
-  "dependencies": {
-    "@sinclair/typebox": "^0.34.33"
-  }
-}
