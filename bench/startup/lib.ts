@@ -1,13 +1,7 @@
 import { measure, do_not_optimize } from 'mitata';
 
-const UNIT_MAP = {
-  ns: 1,
-  us: 1e3,
-  ms: 1e6
-}
-
-const SAMPLES = 5;
-const UNIT: keyof typeof UNIT_MAP = 'ms';
+const UNIT_MAP = ['ns', 'us', 'ms', 's'];
+const SAMPLES = 10;
 
 export const defineTest = () => {
   const results: { name: string; ns: number }[] = [];
@@ -17,6 +11,8 @@ export const defineTest = () => {
     const res = await measure(() => do_not_optimize(f()), {
       max_samples: SAMPLES,
       min_samples: SAMPLES,
+      warmup_samples: 0,
+      warmup_threshold: 0,
       inner_gc: true,
     });
     results.push({
@@ -30,8 +26,18 @@ export const defineTest = () => {
 
     for (let i = 0; i < results.length; i++) {
       const res = results[i].ns;
+      const args: any[] = ['+ ' + results[i].name + ':'];
 
-      const args = [results[i].name + ':', +(res / UNIT_MAP[UNIT]).toFixed(2), UNIT];
+      {
+        let converted = res;
+        let unit = 0;
+        while (converted > 1e3 && unit < UNIT_MAP.length) {
+          unit++;
+          converted /= 1e3;
+        };
+        args.push(+converted.toFixed(2), UNIT_MAP[unit]);
+      }
+
       if (i !== 0) args.push('-', (res / baseline).toFixed(2) + 'x', 'slower');
       console.log(...args);
     }
