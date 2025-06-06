@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@badrap/valita": "^0.4.5",
+    "@sinclair/typebox": "^0.34.33",
+    "@zod/mini": "^4.0.0-beta.0",
+    "ajv": "^8.17.1",
+    "json-accelerator": "^0.1.7",
+    "typia": "^7.6.4",
+    "zod": "^4.0.0-beta.20250505T195954"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.3"
+  }
+}

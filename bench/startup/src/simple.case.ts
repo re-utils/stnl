@@ -3,7 +3,7 @@ import { TypeCompiler } from '@sinclair/typebox/compiler';
 import { t, build } from 'stnl';
 import Ajv from 'ajv/dist/jtd';
 
-import { defineTest } from './lib.js';
+import { defineTest } from '@lib';
 const f = defineTest();
 
 await f.run('stnl', () =>

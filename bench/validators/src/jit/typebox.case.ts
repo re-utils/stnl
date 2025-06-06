@@ -26,8 +26,7 @@ export default defineCase({
         items: Type.Array(Type.Number()),
       });
 
-      const f = TypeCompiler.Compile(schema);
-      return (o) => f.Check(o);
+      return Function(TypeCompiler.Code(schema, []))();
     })(),
   },
 });

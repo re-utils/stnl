@@ -158,7 +158,8 @@ export const __compile = (
     for (let i = 0; i < scopeDeps.length; i++)
       scope += 'd' + (i + 1) + '=' + scopeDeps[i] + ',';
 
-    str += 'd' + deps.push(scope + 'd=' + main + ';return d})()') + '(' + i + ')';
+    str +=
+      'd' + deps.push(scope + 'd=' + main + ';return d})()') + '(' + i + ')';
   }
 
   return wrapped ? str + ')' : str;
