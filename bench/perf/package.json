@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "scripts": {
+    "prep": "bun prepare.ts",
+    "bench:bun": "BUN_JSC_useRecursiveJSONParse=false bun index.ts",
+    "bench:node": "bun tsx --expose-gc --allow-natives-syntax index.ts",
+    "bench": "bun bench:bun && bun bench:node",
+    "start:bun": "bun prep && bun bench:bun",
+    "start:node": "bun prep && bun bench:node",
+    "start": "bun prep && bun bench"
+  }
+}
