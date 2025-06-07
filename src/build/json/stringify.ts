@@ -5,13 +5,6 @@ const __compileKey = (prefix: string, k: string) =>
   "'" + prefix + stringToJSON(k) + ":'";
 
 /**
- * Compiler symbols
- */
-export const symbols = {
-  escapeString: 'e',
-};
-
-/**
  * @private
  */
 export const __compileToFn = (t: TLoadedType, deps: string[]): string =>
@@ -79,7 +72,7 @@ export const __compile = (
 
   const wrapped = isNil || optional;
   if (id === 0 || id === 2 || id === 8) str += '""+' + i;
-  else if (id === 4) str += symbols.escapeString + '(' + i + ')';
+  else if (id === 4) str += 'JSON.stringify(' + i + ')';
   else if (id === 6) str += '(' + i + '?"true":"false")';
   else if (id === 10) {
     str += '(';
@@ -190,4 +183,4 @@ export const code = (t: TLoadedType): string => {
 export const compile = <T extends TLoadedType>(
   t: T,
 ): ((o: TInfer<T>) => string) =>
-  Function(symbols.escapeString, code(t))(stringToJSON);
+  Function(code(t))();

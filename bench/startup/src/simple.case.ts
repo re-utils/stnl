@@ -47,27 +47,29 @@ await f.run('typebox', () =>
   )(),
 );
 
-await f.run('ajv', () => new Ajv().compile({
-  properties: {
-    number: { type: 'float64' },
-    negNumber: { type: 'float64' },
-    maxNumber: { type: 'float64' },
-    string: { type: 'string' },
-    longString: { type: 'string' },
-    boolean: { type: 'boolean' },
-    deeplyNested: {
-      properties: {
-        foo: { type: 'string' },
-        num: { type: 'float64' },
-        bool: { type: 'boolean' },
+await f.run('ajv', () =>
+  new Ajv().compile({
+    properties: {
+      number: { type: 'float64' },
+      negNumber: { type: 'float64' },
+      maxNumber: { type: 'float64' },
+      string: { type: 'string' },
+      longString: { type: 'string' },
+      boolean: { type: 'boolean' },
+      deeplyNested: {
+        properties: {
+          foo: { type: 'string' },
+          num: { type: 'float64' },
+          bool: { type: 'boolean' },
+        },
+        additionalProperties: true,
       },
-      additionalProperties: true,
+      items: {
+        elements: { type: 'float64' },
+      },
     },
-    items: {
-      elements: { type: 'float64' },
-    },
-  },
-  additionalProperties: true,
-}))
+    additionalProperties: true,
+  }),
+);
 
 f.log();

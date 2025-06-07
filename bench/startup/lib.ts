@@ -33,7 +33,7 @@ export const defineTest = () => {
         while (converted > 1e3 && unit < UNIT_MAP.length) {
           unit++;
           converted /= 1e3;
-        };
+        }
         args.push(+converted.toFixed(2) + UNIT_MAP[unit]);
       }
 

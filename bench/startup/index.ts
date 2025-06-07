@@ -10,7 +10,9 @@ logEnd();
 const target: string | undefined = process.argv[3];
 
 if (target == null)
-  for (const path of new Bun.Glob('**/*.ts').scanSync(import.meta.dir + '/src')) {
+  for (const path of new Bun.Glob('**/*.ts').scanSync(
+    import.meta.dir + '/src',
+  )) {
     logRunning(path.slice(0, -8));
     await Bun.$`${{ raw: mode }} src/${path}`;
     logEnd();
