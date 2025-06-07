@@ -41,7 +41,6 @@ casesMap.forEach((val, key) => {
 
       // Check if function validate correctly
       for (const t of suite) t.validate(fn as any);
-      console.log(fn.toString());
 
       bench(test[0] + ` (${key})`, function* () {
         yield {

@@ -12,7 +12,6 @@ export const defineTest = () => {
       max_samples: SAMPLES,
       min_samples: SAMPLES,
       warmup_samples: 0,
-      warmup_threshold: 0,
       inner_gc: true,
     });
     results.push({
@@ -35,10 +34,10 @@ export const defineTest = () => {
           unit++;
           converted /= 1e3;
         };
-        args.push(+converted.toFixed(2), UNIT_MAP[unit]);
+        args.push(+converted.toFixed(2) + UNIT_MAP[unit]);
       }
 
-      if (i !== 0) args.push('-', (res / baseline).toFixed(2) + 'x', 'slower');
+      if (i !== 0) args.push('-', +(res / baseline).toFixed(2) + 'x', 'slower');
       console.log(...args);
     }
   };
