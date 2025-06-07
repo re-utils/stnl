@@ -21,11 +21,12 @@ export const defineTest = () => {
   };
 
   const log = () => {
+    results.sort((a, b) => a.ns - b.ns);
     const baseline = results[0].ns;
 
     for (let i = 0; i < results.length; i++) {
       const res = results[i].ns;
-      const args: any[] = ['+ ' + results[i].name + ':'];
+      const args: any[] = [(i + 1) + '. ' + results[i].name + ':'];
 
       {
         let converted = res;

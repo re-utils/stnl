@@ -1,16 +1,16 @@
 import { defineCase } from '@utils';
 
 import { TypeSystemPolicy } from '@sinclair/typebox/system';
-import { TypeCompiler } from '@sinclair/typebox/compiler';
 import { Type } from '@sinclair/typebox';
+import { Value } from '@sinclair/typebox/value';
 
 TypeSystemPolicy.AllowArrayObject = true;
 TypeSystemPolicy.AllowNaN = true;
 
 export default defineCase({
-  name: '@sinclair/typebox - jit',
+  name: '@sinclair/typebox',
   tests: {
-    assertLoose: (() => {
+    assertLoose() {
       const schema = Type.Object({
         number: Type.Number(),
         negNumber: Type.Number(),
@@ -26,7 +26,7 @@ export default defineCase({
         items: Type.Array(Type.Number()),
       });
 
-      return Function(TypeCompiler.Code(schema, []))();
-    })(),
+      return (o) => Value.Check(schema, o);
+    },
   },
 });

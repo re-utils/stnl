@@ -4,7 +4,7 @@ import Ajv from 'ajv/dist/jtd';
 export default defineCase({
   name: 'ajv - jit',
   tests: {
-    assertLoose: new Ajv().compile({
+    assertLoose: () => new Ajv().compile({
       properties: {
         number: { type: 'float64' },
         negNumber: { type: 'float64' },
@@ -27,7 +27,7 @@ export default defineCase({
       additionalProperties: true,
     }),
 
-    stringify: new Ajv().compileSerializer({
+    stringify: () => new Ajv().compileSerializer({
       elements: {
         properties: {
           name: { type: 'string' },

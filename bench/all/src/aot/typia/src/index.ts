@@ -5,7 +5,7 @@ import { createStringify } from 'typia/lib/json';
 export default defineCase({
   name: 'typia - aot',
   tests: {
-    assertLoose: createIs<{
+    assertLoose: () => createIs<{
       number: number;
       negNumber: number;
       maxNumber: number;
@@ -21,7 +21,7 @@ export default defineCase({
     }>(),
 
     stringify:
-      createStringify<
+      () => createStringify<
         {
           name: string;
           pwd: string;

@@ -4,7 +4,7 @@ import { t, build } from 'stnl';
 export default defineCase({
   name: 'stnl - jit',
   tests: {
-    assertLoose: build.json.assert.compile(
+    assertLoose: () => build.json.assert.compile(
       t.dict({
         number: t.float,
         negNumber: t.float,
@@ -21,7 +21,7 @@ export default defineCase({
       }),
     ),
 
-    stringify: build.json.stringify.compile(
+    stringify: () => build.json.stringify.compile(
       t.list(
         t.dict({
           name: t.string,

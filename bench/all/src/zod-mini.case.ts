@@ -1,10 +1,10 @@
 import { defineCase } from '@utils';
-import { array, boolean, number, object, string } from '@badrap/valita';
+import { array, boolean, number, object, string } from '@zod/mini';
 
 export default defineCase({
-  name: '@badrap/valita',
+  name: '@zod/mini',
   tests: {
-    assertLoose: (() => {
+    assertLoose() {
       const schema = object({
         number: number(),
         negNumber: number(),
@@ -20,7 +20,7 @@ export default defineCase({
         items: array(number()),
       });
 
-      return (o) => schema.try(o).ok;
-    })(),
+      return (o) => schema.safeParse(o).success;
+    }
   },
 });

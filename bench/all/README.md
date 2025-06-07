@@ -3,10 +3,11 @@ Testing validators performance.
 ```sh
 bun prep # Prepare test suites
 
-bun start:bun # Bun
-bun start:node # Node
+bun bench:bun # Bun
+bun bench:node # Node
 
-bun start # Start both
+bun bench # Both runtime
+bun start # Run prep and bench
 ```
 
 ## Filter
