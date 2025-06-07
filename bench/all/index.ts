@@ -15,9 +15,18 @@ import {
   excludeStartupCase,
 } from './filter.js';
 
+// Help message
+if (process.argv.includes('--help')) {
+  console.log('usage: bench <flags>');
+  console.log('flags:');
+  console.log('  --no-startup: skip startup benchmarking');
+  console.log('  --only-startup: only run startup benchmarking');
+  process.exit();
+}
+
 const casesMap = new Map<string, [string, ReturnType<Tests[keyof Tests]>][]>();
 
-{
+if (!process.argv.includes('--no-startup')) {
   const startupMeasures: Record<string, ReturnType<typeof measureStartup>> = {};
 
   // Map cases
@@ -41,18 +50,17 @@ const casesMap = new Map<string, [string, ReturnType<Tests[keyof Tests]>][]>();
 
   for (const key in startupMeasures) {
     console.log('Startup time:', key);
-
     {
       const measures = startupMeasures[key];
       measures.log();
     }
-
     console.log();
   }
-}
 
-if (process.argv.includes('--startup'))
-  process.exit();
+  // Run only startup benchmark
+  if (process.argv.includes('--only-startup'))
+    process.exit();
+}
 
 // Register to mitata
 casesMap.forEach((val, key) => {

@@ -1,7 +1,7 @@
 import { measure, do_not_optimize } from 'mitata';
 
 const UNIT_MAP = ['ns', 'us', 'ms', 's'];
-const SAMPLES = 10;
+const SAMPLES = 5;
 
 const round = (n: number) => +n.toFixed(2);
 const wrapString = (n: string) => "'" + n + "'";

@@ -3,6 +3,7 @@
   "scripts": {
     "prep": "bun prepare.ts",
     "bench:bun": "BUN_JSC_useRecursiveJSONParse=false bun index.ts",
-    "bench:node": "bun tsx --expose-gc --allow-natives-syntax index.ts"
+    "bench:node": "bun tsx --expose-gc --allow-natives-syntax index.ts",
+    "bench:help": "bun index.ts --help"
   }
 }
