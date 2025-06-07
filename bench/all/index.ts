@@ -41,10 +41,18 @@ const casesMap = new Map<string, [string, ReturnType<Tests[keyof Tests]>][]>();
 
   for (const key in startupMeasures) {
     console.log('Startup time:', key);
-    startupMeasures[key].log();
+
+    {
+      const measures = startupMeasures[key];
+      measures.log();
+    }
+
     console.log();
   }
 }
+
+if (process.argv.includes('--startup'))
+  process.exit();
 
 // Register to mitata
 casesMap.forEach((val, key) => {

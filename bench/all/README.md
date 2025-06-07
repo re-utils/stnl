@@ -6,8 +6,18 @@ bun prep # Prepare test suites
 bun bench:bun # Bun
 bun bench:node # Node
 
-bun bench # Both runtime
-bun start # Run prep and bench
+bun bench:bun --startup # Only run startup time bench
+```
+
+## Tests
+You can modify test data in [tests](./tests).
+
+To add a new test simply create a file named `(test_name).case.ts` and return a list of objects that matches:
+```ts
+interface _ {
+  data: any;
+  validate: (validator: (o: any) => any) => any; // Throws here if the validator is not valid
+}
 ```
 
 ## Filter
