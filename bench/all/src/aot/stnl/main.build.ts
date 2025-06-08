@@ -11,5 +11,6 @@ for (const name in schemas) {
 
 Bun.write(ROOT + 'index.js', `export default{\n${chunks.join(',\n')}\n}`);
 Bun.write(
-  ROOT + 'index.d.ts','declare const _:Dict<() => (a: any) => any>;\nexport default _',
+  ROOT + 'index.d.ts',
+  'declare const _:Dict<() => (a: any) => any>;\nexport default _',
 );

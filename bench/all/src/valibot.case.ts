@@ -1,8 +1,8 @@
 import { defineCase } from '@utils';
-import { array, boolean, number, object, string } from '@zod/mini';
+import { array, safeParse, boolean, number, object, string } from 'valibot';
 
 export default defineCase({
-  name: '@zod/mini',
+  name: 'valibot',
   tests: {
     assertLoose() {
       const schema = object({
@@ -20,7 +20,7 @@ export default defineCase({
         items: array(number()),
       });
 
-      return (o) => schema.safeParse(o).success;
+      return (o) => safeParse(schema, o).success;
     },
   },
 });

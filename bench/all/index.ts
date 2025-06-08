@@ -58,8 +58,7 @@ if (!process.argv.includes('--no-startup')) {
   }
 
   // Run only startup benchmark
-  if (process.argv.includes('--only-startup'))
-    process.exit();
+  if (process.argv.includes('--only-startup')) process.exit();
 }
 
 // Register to mitata

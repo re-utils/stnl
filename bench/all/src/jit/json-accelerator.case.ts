@@ -12,14 +12,15 @@ const SanitizedString = Type.String({ sanitize: true });
 export default defineCase({
   name: 'json-accelerator - jit',
   tests: {
-    stringify: () => createAccelerator(
-      Type.Array(
-        Type.Object({
-          name: SanitizedString,
-          pwd: SanitizedString,
-          id: Type.Array(Type.Number()),
-        }),
+    stringify: () =>
+      createAccelerator(
+        Type.Array(
+          Type.Object({
+            name: SanitizedString,
+            pwd: SanitizedString,
+            id: Type.Array(Type.Number()),
+          }),
+        ),
       ),
-    ),
   },
 });
