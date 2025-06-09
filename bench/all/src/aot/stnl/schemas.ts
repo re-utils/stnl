@@ -16,13 +16,3 @@ export const assertLoose = build.json.assert.code(
     items: t.list(t.float),
   }),
 );
-
-export const stringify = build.json.stringify.code(
-  t.list(
-    t.dict({
-      name: t.string,
-      pwd: t.string,
-      id: t.list(t.float),
-    }),
-  ),
-);
