@@ -4,6 +4,7 @@
     "@sinclair/typebox": "^0.34.33",
     "@zod/mini": "^4.0.0-beta.0",
     "ajv": "^8.17.1",
+    "arktype": "^2.1.20",
     "json-accelerator": "^0.1.7",
     "typia": "^7.6.4",
     "zod": "^4.0.0-beta.20250505T195954"

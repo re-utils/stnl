@@ -211,8 +211,3 @@ const stringifyUser = build.json.stringify.compile(schema);
 if (isUser(user))
   console.log(stringifyUser(user) === JSON.stringify(user)); // true
 ```
-
-For code injection to other functions:
-```ts
-console.log(build.json.stringify.code(schema));
-```

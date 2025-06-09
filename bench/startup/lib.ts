@@ -1,7 +1,7 @@
 import { measure, do_not_optimize } from 'mitata';
 
 const UNIT_MAP = ['ns', 'us', 'ms', 's'];
-const SAMPLES = 5;
+const SAMPLES = 3;
 
 const round = (n: number) => +n.toFixed(2);
 const wrapString = (n: string) => "'" + n + "'";
@@ -29,7 +29,7 @@ export const defineTest = () => {
 
     for (let i = 0; i < results.length; i++) {
       const res = results[i].ns;
-      const args: any[] = [(i + 1) + '. ' + wrapString(results[i].name) + ':'];
+      const args: any[] = [i + 1 + '. ' + wrapString(results[i].name) + ':'];
 
       {
         let converted = res;
@@ -56,12 +56,26 @@ export const defineTest = () => {
     s1 = wrapString(s1);
 
     if (r0.ns > r1.ns)
-      console.log('(+)', s1, 'is', round(r0.ns / r1.ns) + 'x', 'faster than', s0);
+      console.log(
+        '(+)',
+        s1,
+        'is',
+        round(r0.ns / r1.ns) + 'x',
+        'faster than',
+        s0,
+      );
     else if (r0.ns === r1.ns)
       console.log('(+)', s1, 'has equal performance to', s0);
     else
-      console.log('(+)', s0, 'is', round(r1.ns / r0.ns) + 'x', 'faster than', s1);
-  }
+      console.log(
+        '(+)',
+        s0,
+        'is',
+        round(r1.ns / r0.ns) + 'x',
+        'faster than',
+        s1,
+      );
+  };
 
   return { results, run, log, compare };
 };
