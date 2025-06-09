@@ -1,5 +1,15 @@
 Testing validators performance.
 
+Requirements: [`bun`](https://bun.sh), [`node`](https://nodejs.org)
+
+And install all dependencies in [root](../..) and [bench](../) directory.
+```sh
+# From current README directory
+cd .. && bun i
+cd .. && bun i
+cd bench/all
+```
+
 ```sh
 bun prep # Prepare test suites
 

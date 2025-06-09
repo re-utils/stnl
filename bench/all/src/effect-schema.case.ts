@@ -18,7 +18,7 @@ export default defineCase({
             num: Schema.Number,
             bool: Schema.Boolean,
           }),
-          items: Schema.Array(Schema.Number)
+          items: Schema.Array(Schema.Number),
         }),
       ),
   },
