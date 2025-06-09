@@ -1,4 +1,4 @@
-A simple type validator built for performance.
+A simple, opinionated type validator built for performance.
 
 ## Features
 - Types work across languages

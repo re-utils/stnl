@@ -1,7 +1,7 @@
 {
   "name": "stnl",
   "version": "1.1.4",
-  "description": "A fast, simple type validation library",
+  "description": "A simple, opinionated type validator built for performance",
   "keywords": [
     "validator",
     "minimal",
