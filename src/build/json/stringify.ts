@@ -5,8 +5,7 @@ import type { TInfer, TLoadedType } from '../../type.js';
 // Hardcode cases that can be optimized
 const __number_list = (o: any[]) => {
   let _ = '[';
-  for (let i = 0; i < o.length; i++)
-    _ += (i === 0 ? '' : ',') + o[i];
+  for (let i = 0; i < o.length; i++) _ += (i === 0 ? '' : ',') + o[i];
   return _ + ']';
 };
 const __bool_list = (o: any[]) => {
@@ -17,7 +16,7 @@ const __bool_list = (o: any[]) => {
 };
 
 const __number = (o: any) => '' + o;
-const __bool = (o: boolean) => o ? 'true' : 'false';
+const __bool = (o: boolean) => (o ? 'true' : 'false');
 
 /**
  * Get the compiled stringifier of a schema
@@ -28,10 +27,8 @@ export const compile = <T extends TLoadedType>(
 ): ((o: TInfer<T>) => string) => {
   let id = t[0];
 
-  if (id === 0 || id === 2)
-    return __number;
-  if (id === 6)
-    return __bool;
+  if (id === 0 || id === 2) return __number;
+  if (id === 6) return __bool;
 
   if (id === 10) {
     // @ts-ignore
@@ -46,16 +43,14 @@ export const compile = <T extends TLoadedType>(
     return Function(code + '"\\' + JSON.stringify(list[0]) + '"\\')();
   }
 
-  if (id === 12) {
-    // @ts-ignore
-    const x = typeof t[1] === 'string' ? JSON.stringify(t[1]) : '' + t[1];
-    return () => x;
-  }
-
   if (id === 14) {
     // @ts-ignore
     id = t[1][0];
-    return id === 0 || id === 2 ? __number_list : id === 6 ? __bool_list : JSON.stringify;
+    return id === 0 || id === 2
+      ? __number_list
+      : id === 6
+        ? __bool_list
+        : JSON.stringify;
   }
 
   return JSON.stringify;

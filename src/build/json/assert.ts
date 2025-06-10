@@ -192,16 +192,16 @@ export const __compile = (
  */
 export const code = (t: TLoadedType): string => {
   const deps: string[] = [];
-  const str = 'return ' + optimizeDirectCall(__compileToFn(t, deps));
+
+  let res = '"use strict"';
+  const str = optimizeDirectCall(__compileToFn(t, deps));
 
   if (deps.length > 0) {
-    let res = '';
     for (let i = 0; i < deps.length; i++)
-      res += (i === 0 ? 'var d' : ',d') + (i + 1) + '=' + deps[i];
-    return res + ';' + str;
+      res += (i === 0 ? ';var d' : ',d') + (i + 1) + '=' + deps[i];
   }
 
-  return str;
+  return res + ';return ' + str;
 };
 
 /**
