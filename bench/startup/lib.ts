@@ -1,7 +1,6 @@
-import { measure, do_not_optimize } from 'mitata';
+import { now } from 'mitata/src/lib.mjs';
 
 const UNIT_MAP = ['ns', 'us', 'ms', 's'];
-const SAMPLES = 3;
 
 const round = (n: number) => +n.toFixed(2);
 const wrapString = (n: string) => "'" + n + "'";
@@ -10,16 +9,13 @@ export const defineTest = () => {
   const results: { name: string; ns: number }[] = [];
 
   const run = async (name: string, f: () => any) => {
-    // No optimization
-    const res = await measure(() => do_not_optimize(f()), {
-      max_samples: SAMPLES,
-      min_samples: SAMPLES,
-      warmup_samples: 0,
-      inner_gc: true,
-    });
+    let start = now();
+    f();
+    start = now() - start;
+
     results.push({
       name,
-      ns: res.avg,
+      ns: start,
     });
   };
 
