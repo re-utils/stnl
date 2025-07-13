@@ -1,14 +1,30 @@
 import { now } from 'mitata/src/lib.mjs';
+import { createColors } from 'picocolors';
 
-const UNIT_MAP = ['ns', 'us', 'ms', 's'];
+const pc = createColors(true);
 
-const round = (n: number) => +n.toFixed(2);
-const wrapString = (n: string) => "'" + n + "'";
+const createUnitFormat = (units: string[]) => (n: number) => {
+  let i = 0;
+  while (n >= 1000 && i < units.length - 1) {
+    i++;
+    n /= 1000;
+  }
+  return pc.yellowBright(n.toFixed(2) + units[i]);
+};
+
+export const format = {
+  time: createUnitFormat(['ns', 'us', 'ms', 's']),
+  name: (name: string) => pc.bold(pc.cyan(name)),
+  multiplier: (x: number) => pc.greenBright(x.toFixed(2) + 'x'),
+  header: pc.bold,
+  success: pc.greenBright,
+  error: pc.redBright,
+};
 
 export const defineTest = () => {
   const results: { name: string; ns: number }[] = [];
 
-  const run = async (name: string, f: () => any) => {
+  const run = (name: string, f: () => any) => {
     let start = now();
     f();
     start = now() - start;
@@ -25,53 +41,11 @@ export const defineTest = () => {
 
     for (let i = 0; i < results.length; i++) {
       const res = results[i].ns;
-      const args: any[] = [i + 1 + '. ' + wrapString(results[i].name) + ':'];
-
-      {
-        let converted = res;
-        let unit = 0;
-        while (converted > 1e3 && unit < UNIT_MAP.length) {
-          unit++;
-          converted /= 1e3;
-        }
-        args.push(round(converted) + UNIT_MAP[unit]);
-      }
-
-      if (i !== 0) args.push('---', round(res / baseline) + 'x', 'slower');
-      console.log(...args);
+      console.log(`  ${format.name(results[i].name)}: ${format.time(res)}${
+        i === 0 ? '' : ` - ${format.multiplier(res / baseline)} slower`
+      }`);
     }
   };
 
-  const compare = (s0: string, s1: string) => {
-    const r0 = results.find((e) => e.name === s0);
-    const r1 = results.find((e) => e.name === s1);
-
-    if (r0 == null || r1 == null) return;
-
-    s0 = wrapString(s0);
-    s1 = wrapString(s1);
-
-    if (r0.ns > r1.ns)
-      console.log(
-        '(+)',
-        s1,
-        'is',
-        round(r0.ns / r1.ns) + 'x',
-        'faster than',
-        s0,
-      );
-    else if (r0.ns === r1.ns)
-      console.log('(+)', s1, 'has equal performance to', s0);
-    else
-      console.log(
-        '(+)',
-        s0,
-        'is',
-        round(r1.ns / r0.ns) + 'x',
-        'faster than',
-        s1,
-      );
-  };
-
-  return { results, run, log, compare };
+  return { results, run, log };
 };

@@ -6,7 +6,7 @@ import Ajv from 'ajv/dist/jtd';
 import { defineTest } from '@lib';
 const f = defineTest();
 
-await f.run('stnl', () =>
+f.run('stnl', () =>
   build.json.assert.compile(
     t.scope(t.ref('project'), {
       project: t.dict(
@@ -71,7 +71,7 @@ await f.run('stnl', () =>
   ),
 );
 
-await f.run('typebox', () => {
+f.run('typebox', () => {
   const mod = Type.Module({
     project: Type.Object({
       id: Type.Ref('uuid'),
@@ -135,7 +135,7 @@ await f.run('typebox', () => {
   return Function(TypeCompiler.Code(mod, []))();
 });
 
-await f.run('ajv', () =>
+f.run('ajv', () =>
   new Ajv().compile({
     definitions: {
       uuid: {
