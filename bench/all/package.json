@@ -5,9 +5,5 @@
     "bench:bun": "BUN_JSC_useRecursiveJSONParse=false bun index.ts",
     "bench:node": "bun tsx --expose-gc --allow-natives-syntax index.ts",
     "bench:help": "bun index.ts --help"
-  },
-  "dependencies": {
-    "@effect/schema": "^0.75.5",
-    "valibot": "^1.1.0"
   }
 }
