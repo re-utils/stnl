@@ -1,10 +1,11 @@
-import { format } from "@lib";
+import { format } from '@lib';
 
 Bun.$.cwd(import.meta.dir);
 
 const logRunning = (name: string) => console.log(format.header(name) + ':');
 
-const mode = process.argv[2] === 'node' ? 'bun tsx --no-opt' : 'BUN_JSC_useDFGJIT=0 bun';
+const mode =
+  process.argv[2] === 'node' ? 'bun tsx --no-opt' : 'BUN_JSC_useDFGJIT=0 bun';
 console.log(mode);
 
 const target: string | undefined = process.argv[3];

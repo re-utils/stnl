@@ -41,9 +41,11 @@ export const defineTest = () => {
 
     for (let i = 0; i < results.length; i++) {
       const res = results[i].ns;
-      console.log(`  ${format.name(results[i].name)}: ${format.time(res)}${
-        i === 0 ? '' : ` - ${format.multiplier(res / baseline)} slower`
-      }`);
+      console.log(
+        `  ${format.name(results[i].name)}: ${format.time(res)}${
+          i === 0 ? '' : ` - ${format.multiplier(res / baseline)} slower`
+        }`,
+      );
     }
   };
 
