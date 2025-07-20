@@ -1,9 +1,10 @@
 import { bench } from "@ark/attest";
 import { t } from "stnl";
-import { Type } from "@sinclair/typebox";
+import { Type, type Static } from "@sinclair/typebox";
+import { type } from "arktype";
 
-bench("stnl", () =>
-  t.scope(t.ref("project"), {
+bench("stnl", () => {
+  const _ = t.scope(t.ref("project"), {
     project: t.dict(
       {
         id: t.ref("uuid"),
@@ -62,11 +63,13 @@ bench("stnl", () =>
         last_login: t.string,
       },
     ),
-  }),
-).types([604, "instantiations"]);
+  });
 
-bench("typebox", () =>
-  Type.Module({
+  type _ = t.TInfer<typeof _>;
+}).types([741, "instantiations"]);
+
+bench("typebox", () => {
+  const _ = Type.Module({
     project: Type.Object({
       id: Type.Ref("uuid"),
       name: Type.String(),
@@ -124,5 +127,59 @@ bench("typebox", () =>
       is_active: Type.Boolean(),
       last_login: Type.Optional(Type.String()),
     }),
-  }).Import("project"),
-).types([7262, "instantiations"]);
+  }).Import("project");
+
+  type _ = Static<typeof _>;
+}).types([17642, "instantiations"]);
+
+bench("arktype", () => {
+  const _ = type.module({
+    project: {
+      id: "uuid",
+      name: "string",
+      owner_id: "uuid",
+      members: "user[]",
+      tasks: "task[]",
+      created_at: "string",
+
+      "description?": "string",
+      tags: "string[]",
+    },
+
+    uuid: "string",
+    user_role: '"admin" | "manager" | "developer" | "viewer"',
+    task_status: '"todo" | "in_progress" | "review" | "done"',
+
+    comment: {
+      id: "string",
+      author_id: "string",
+      content: "string",
+      created_at: "string",
+
+      "updated_at?": "string",
+    },
+
+    task: {
+      id: "string",
+      title: "string",
+      status: "task_status",
+      assignees: "uuid[]",
+      comments: "comment[]",
+      created_at: "string",
+
+      "description?": "string",
+      "due_date?": "string",
+    },
+
+    user: {
+      id: "uuid",
+      name: "string",
+      email: "string",
+      role: "user_role",
+      is_active: "boolean",
+      "last_login?": "string",
+    },
+  }).project;
+
+  type _ = typeof _.infer;
+}).types([30586, "instantiations"]);
