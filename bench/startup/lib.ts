@@ -1,4 +1,4 @@
-import { now } from 'mitata/src/lib.mjs';
+import { measure } from 'mitata';
 import { createColors } from 'picocolors';
 
 const pc = createColors(true);
@@ -24,14 +24,16 @@ export const format = {
 export const defineTest = () => {
   const results: { name: string; ns: number }[] = [];
 
-  const run = (name: string, f: () => any) => {
-    let start = now();
-    f();
-    start = now() - start;
+  const run = async (name: string, f: () => any) => {
+    const res = await measure(f, {
+      inner_gc: true,
+      warmup_samples: 0,
+      max_samples: 1,
+    });
 
     results.push({
       name,
-      ns: start,
+      ns: res.avg,
     });
   };
 

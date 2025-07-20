@@ -6,13 +6,13 @@ import Ajv from 'ajv/dist/jtd';
 import { defineTest } from '@lib';
 const f = defineTest();
 
-f.run('stnl', () =>
+await f.run('stnl', () =>
   build.json.assert.compile(
     t.scope(t.dict({ name: t.string }, { next: t.self })),
   ),
 );
 
-f.run('typebox', () =>
+await f.run('typebox', () =>
   Function(
     TypeCompiler.Code(
       Type.Recursive((This) =>
@@ -26,7 +26,7 @@ f.run('typebox', () =>
   )(),
 );
 
-f.run('ajv', () =>
+await f.run('ajv', () =>
   new Ajv().compile({
     definitions: {
       self: {
