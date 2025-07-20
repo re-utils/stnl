@@ -28,7 +28,7 @@ export const defineTest = () => {
     const res = await measure(f, {
       inner_gc: true,
       warmup_samples: 0,
-      max_samples: 1
+      max_samples: 1,
     });
 
     results.push({
