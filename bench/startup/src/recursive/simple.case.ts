@@ -4,6 +4,7 @@ import { t, build } from 'stnl';
 import Ajv from 'ajv/dist/jtd';
 
 import { defineTest } from '@lib';
+import { type } from 'arktype';
 const f = defineTest();
 
 await f.run('stnl', () =>
@@ -41,6 +42,15 @@ await f.run('ajv', () =>
     },
     ref: 'self',
   }),
+);
+
+await f.run('arktype', () =>
+  type.module({
+    self: {
+      name: 'string',
+      'next?': 'self'
+    }
+  }).self
 );
 
 f.log();
