@@ -122,8 +122,9 @@ export const __compile = (
       str += '&&' + __compile(list[j], i + '[' + j + ']', deps, false);
   } else if (id === 20) {
     str += (isNil ? '' : i + '!==null&&') + 'typeof ' + i + '==="object"&&(';
+    i += '.';
     // @ts-ignore Tag
-    const tag = i + '.' + t[1];
+    const tag = i + t[1];
 
     // @ts-ignore Map
     for (const key in t[2]) {
@@ -140,7 +141,7 @@ export const __compile = (
             first = false;
             str += '&&';
           }
-          str += __compile(o[key], i + '.' + key, deps, false);
+          str += __compile(o[key], i + key, deps, false);
         }
       }
 
@@ -151,7 +152,7 @@ export const __compile = (
             first = false;
             str += '&&';
           }
-          str += __compile(o[key], i + '.' + key, deps, true);
+          str += __compile(o[key], i + key, deps, true);
         }
       }
 
@@ -160,8 +161,8 @@ export const __compile = (
 
     str += 'false)';
   } else if (id === 22)
-    // @ts-ignore Check for self ref
-    str += (t.length === 1 ? 'd' : 'd' + t[1]) + '(' + i + ')';
+    // @ts-ignore Ref name
+    str += 'd' + t[1] + '(' + i + ')';
   else if (id === 24) {
     let scope = '(()=>{var ';
     const scopeDeps: string[] = [];

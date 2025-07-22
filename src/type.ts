@@ -1,14 +1,11 @@
 import type { LLen } from './limit.js';
 
-type Prettify<T> = {
+type Evaluate<T> = {
   [K in keyof T]: T[K];
 } & {};
 
 declare const _: unique symbol;
 type _ = typeof _;
-
-declare const _ref: unique symbol;
-type _ref = typeof _ref;
 
 export interface IType<
   out I extends number = number,
@@ -45,7 +42,7 @@ interface NullableMap {
 type ToNullable<T extends IType<keyof NullableMap>> = IType<
   NullableMap[T[0]],
   T[_] | null,
-  T[_ref]
+  T['']
 >;
 
 export type TInt = IType<0, number, never>;
@@ -61,59 +58,54 @@ export type TUnion<T extends CUnion> = IType<10, T[number], never>;
 type CConst = number | string | boolean;
 export type TConst<T extends CConst> = IType<12, T, never>;
 
-export type TList<T extends IType> = IType<14, T[_][], T[_ref]>;
+export type TList<T extends IType> = IType<14, T[_][], T['']>;
 export type TDict<Required extends TypeDict, Optional extends TypeDict> = IType<
   16,
-  Prettify<
+  Evaluate<
     {
       [K in keyof Required]: Required[K][_];
     } & {
       [K in keyof Optional]?: Optional[K][_];
     }
   >,
-  (Required[keyof Required] | Optional[keyof Optional])[_ref]
+  (Required[keyof Required] | Optional[keyof Optional])['']
 >;
 
 type CTuple = [IType, IType, ...IType[]];
 export type TTuple<T extends CTuple> = IType<
   18,
   InferTypeList<T>,
-  T[number][_ref]
+  T[number]['']
 >;
 
 export type TTag<I extends string, T extends TypeDict> = IType<
   20,
-  Prettify<
+  Evaluate<
     {
       [K in keyof T]: { [N in I]: K } & T[K][_];
     }[keyof T]
   >,
-  T[keyof T][_ref]
+  T[keyof T]['']
 >;
 
 // References
-interface Ref<T> {
-  [_ref]: T;
+interface Ref<out T> {
+  ['']: T;
 }
+export type SelfRef = Ref<''>;
+export type TSelf = TRef<''>;
+
 export type TRef<T> = IType<22, Ref<T>, T>;
 
-type LoadRefList<T extends any[], M extends Record<string, any>> = T extends [
-  infer A,
-  ...infer B,
-]
-  ? [LoadRef<A, M>, ...LoadRefList<B, M>]
-  : [];
-type LoadRef<T, M extends Record<string, any>> = T extends Ref<
-  infer K extends keyof M
->
-  ? LoadRef<M[K], M>
-  : T extends Record<string, any>
-    ? {
-        [K in keyof T]: LoadRef<T[K], M>;
-      }
-    : T extends any[]
-      ? LoadRefList<T, M>
-      : T;
+type ResolveRef<Root, Map, Type> = Type extends SelfRef
+  ? ResolveRef<Root, Map, Root>
+  : Type extends Ref<infer K extends keyof Map>
+    ? ResolveRef<Root, Map, Map[K]>
+    : Type extends Record<string, any> | any[]
+      ? {
+          [K in keyof Type]: ResolveRef<Root, Map, Type[K]>;
+        }
+      : Type;
 
 // A scope that loads some references
 export type TScope<
@@ -121,13 +113,14 @@ export type TScope<
   R extends Record<any, IType | undefined>,
 > = IType<
   24,
-  LoadRef<
+  ResolveRef<
     T[_],
     {
       [K in keyof R]: (R[K] & {})[_];
-    } & Ref<T[_]>
+    },
+    T[_]
   >,
-  Exclude<T[_ref], _ref | keyof R>
+  Exclude<T[''], '' | keyof R>
 >;
 
 // Primitives
@@ -213,18 +206,18 @@ export const ref = <const T extends string>(t: T): TRef<T> => [22, t] as any;
 /**
  * Reference to the scope type
  */
-export const self: TRef<_ref> = [22] as any;
+export const self: TSelf = [22, ''] as any;
 
 /**
  * Nullable reference to the type of the upper scope
  */
-export const nullable_self: ToNullable<TRef<_ref>> = [23] as any;
+export const nullable_self: ToNullable<TSelf> = [23, ''] as any;
 
 interface FScope {
   <
     const T extends IType,
     const R extends {
-      [K in Exclude<T[_ref], _ref>]?: IType;
+      [K in T['']]?: IType;
     },
   >(
     t: T,

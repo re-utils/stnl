@@ -2,15 +2,11 @@ import { l, t } from 'stnl';
 import { schema } from './utils.js';
 
 const A = t.scope(
-  t.dict(
-    {
-      x: t.ref('x'),
-      y: t.ref('y'),
-    },
-    {
-      next: t.nullable_self,
-    },
-  ),
+  t.dict({
+    x: t.ref('x'),
+    y: t.ref('y'),
+    next: t.nullable_self,
+  }),
   { x: t.int },
 );
 

@@ -67,7 +67,7 @@ bench('stnl', () => {
   );
 
   type _ = t.TInfer<typeof _>;
-}).types([712, 'instantiations']);
+}).types([668, 'instantiations']);
 
 bench('typebox', () => {
   const _ = Type.Module({
