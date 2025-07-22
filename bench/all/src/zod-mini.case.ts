@@ -1,8 +1,8 @@
 import { defineCase } from '@utils';
-import { array, boolean, number, object, string } from '@zod/mini';
+import { array, boolean, number, object, string } from 'zod/mini';
 
 export default defineCase({
-  name: '@zod/mini',
+  name: 'zod/mini',
   tests: {
     assertLoose() {
       const schema = object({

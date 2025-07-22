@@ -4,7 +4,6 @@
     "@effect/schema": "^0.75.5",
     "@inbestigator/vali": "npm:@jsr/inbestigator__vali",
     "@sinclair/typebox": "^0.34.37",
-    "@zod/mini": "^4.0.0-beta.0",
     "ajv": "^8.17.1",
     "arktype": "^2.1.20",
     "joi": "^17.13.3",
