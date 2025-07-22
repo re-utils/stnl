@@ -59,7 +59,7 @@ casesMap.forEach((val, key) => {
     console.log('Validating:', key);
 
     const suite = tests[key as keyof typeof tests];
-    const suiteData = suite.map((t) => t.data);
+    const suiteData = suite.filter((t) => t.benchmark).map((t) => t.data);
 
     for (const [name, fn] of val) {
       console.log('- Checking:', name);
@@ -77,7 +77,7 @@ casesMap.forEach((val, key) => {
       });
     }
 
-    console.log();
+    console.log('Benchmarking with', suiteData.length, 'values\n');
   });
 });
 

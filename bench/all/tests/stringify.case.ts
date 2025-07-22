@@ -17,6 +17,7 @@ const valid = () => ({
     id: new Array(6 + Math.round(Math.random() * 9)).fill(0).map(Math.random),
   })),
   validate: validator,
+  benchmark: true,
 });
 
 export default Array.from({ length: 500 }, valid);

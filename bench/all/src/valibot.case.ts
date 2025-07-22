@@ -1,5 +1,5 @@
 import { defineCase } from '@utils';
-import { array, safeParse, boolean, number, object, string } from 'valibot';
+import { array, assert, boolean, number, object, string } from 'valibot';
 
 export default defineCase({
   name: 'valibot',
@@ -20,7 +20,9 @@ export default defineCase({
         items: array(number()),
       });
 
-      return (o) => safeParse(schema, o).success;
+      return (o) => {
+        assert(schema, o);
+      };
     },
   },
 });

@@ -9,6 +9,7 @@
     "joi": "^17.13.3",
     "json-accelerator": "^0.1.7",
     "picocolors": "^1.1.1",
+    "sury": "^11.0.0-alpha.0",
     "typia": "^7.6.4",
     "valibot": "^1.1.0",
     "zod": "^4.0.5"

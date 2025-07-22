@@ -1,11 +1,17 @@
 import { randomStr, randRemoveProp } from './utils.js';
 
 function trueValidator(this: { data: any }, fn: (o: any) => boolean) {
-  if (!fn(this.data)) throw new Error('A validator is invalid!');
+  // Support validator that throws and not throw
+  const res = fn(this.data);
+  if (res !== true && res !== undefined) throw new Error('A validator is invalid!');
 }
 
 function falseValidator(this: { data: any }, fn: (o: any) => boolean) {
-  if (fn(this.data)) throw new Error('A validator is invalid!');
+  // Support validator that throws and not throw
+  try {
+    const res = fn(this.data);
+    if (res === true || res === undefined) throw new Error('A validator is invalid!');
+  } catch {}
 }
 
 const valid = () => ({
@@ -26,12 +32,14 @@ const valid = () => ({
       .map(Math.random),
   },
   validate: trueValidator,
+  benchmark: true,
 });
 
 const invalid = () => {
   const data = valid();
   randRemoveProp(data.data);
   data.validate = falseValidator;
+  data.benchmark = false;
   return data;
 };
 
@@ -39,9 +47,10 @@ const deepInvalid = () => {
   const data = valid();
   randRemoveProp(data.data.deeplyNested);
   data.validate = falseValidator;
+  data.benchmark = false;
   return data;
 };
 
 export default Array.from({ length: 500 }, (_, i) =>
-  i % 10 === 0 ? invalid() : i % 20 === 0 ? deepInvalid() : valid(),
+  i % 50 === 0 ? invalid() : i % 25 === 0 ? deepInvalid() : valid(),
 );

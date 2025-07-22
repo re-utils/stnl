@@ -1,5 +1,6 @@
 export interface Tests {
-  assertLoose: () => (o: any) => boolean;
+  // Support validators that throws or return boolean
+  assertLoose: () => (o: any) => boolean | void;
   stringify: () => (o: any) => string;
 }
 

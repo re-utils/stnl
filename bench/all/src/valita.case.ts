@@ -20,7 +20,9 @@ export default defineCase({
         items: array(number()),
       });
 
-      return (o) => schema.try(o).ok;
+      return (o) => {
+        schema.parse(o);
+      };
     },
   },
 });
