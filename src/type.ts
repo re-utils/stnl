@@ -17,6 +17,7 @@ export interface IType<
 > extends Ref<R> {
   0: I;
   [_]: T;
+  length: number;
 }
 export type TLoadedType = IType<number, any, never>;
 
@@ -145,7 +146,7 @@ export const nullable = <
   const T extends IType<keyof NullableMap>,
 >(
   t: T,
-): ToNullable<T> => (t as any as any[]).with(0, t[0] + 1) as any;
+): ToNullable<T> => (t as any as any[]).with(0, t[0] | 1) as any;
 
 /**
  * Create an union schema

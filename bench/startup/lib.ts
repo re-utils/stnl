@@ -21,7 +21,11 @@ export const format = {
   error: pc.redBright,
 };
 
-const exec = new Function('n', 'f', '"use strict";var a=n();f();var b=n();return b-a');
+const exec = new Function(
+  'n',
+  'f',
+  '"use strict";var a=n();f();var b=n();return b-a',
+);
 await measure(now);
 
 export const defineTest = () => {

@@ -44,13 +44,15 @@ f.run('ajv', () =>
   }),
 );
 
-f.run('arktype', () =>
-  type.module({
-    self: {
-      name: 'string',
-      'next?': 'self'
-    }
-  }).self
+f.run(
+  'arktype',
+  () =>
+    type.module({
+      self: {
+        name: 'string',
+        'next?': 'self',
+      },
+    }).self,
 );
 
 f.log();

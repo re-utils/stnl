@@ -15,48 +15,42 @@ import {
   excludeStartupCase,
 } from './filter.js';
 
-// Help message
-if (process.argv.includes('--help')) {
-  console.log('usage: bench <flags>');
-  console.log('flags:');
-  console.log('  --no-startup: skip startup benchmarking');
-  console.log('  --only-startup: only run startup benchmarking');
-  process.exit();
-}
+const MEASURE_STARTUP = process.argv.includes('--startup');
 
 const casesMap = new Map<string, [string, ReturnType<Tests[keyof Tests]>][]>();
+const startupMeasures: Record<string, ReturnType<typeof measureStartup>> = {};
 
-if (process.argv.includes('--startup')) {
-  const startupMeasures: Record<string, ReturnType<typeof measureStartup>> = {};
+// Map cases
+for (const c of cases) {
+  const name = c.name;
+  if (excludeCase(name) || !includeCase(name)) continue;
 
-  // Map cases
-  for (const c of cases) {
-    const name = c.name;
-    if (excludeCase(name) || !includeCase(name)) continue;
+  for (const test in c.tests) {
+    // @ts-ignore
+    const createFn = c.tests[test];
 
-    for (const test in c.tests) {
-      // @ts-ignore
-      const createFn = c.tests[test];
+    // Measure startup time of the init fn
 
-      // Measure startup time of the init fn
-      if (includeStartupCase(name) && !excludeStartupCase(name))
-        (startupMeasures[test] ??= measureStartup()).run(name, createFn);
+    if (
+      MEASURE_STARTUP &&
+      includeStartupCase(name) &&
+      !excludeStartupCase(name)
+    )
+      (startupMeasures[test] ??= measureStartup()).run(name, createFn);
 
-      const obj = [name, createFn()] as [any, any];
-      if (casesMap.has(test)) casesMap.get(test)!.push(obj);
-      else casesMap.set(test, [obj]);
-    }
+    const obj = [name, createFn()] as [any, any];
+    if (casesMap.has(test)) casesMap.get(test)!.push(obj);
+    else casesMap.set(test, [obj]);
   }
-
-  for (const key in startupMeasures) {
-    console.log('Startup time:', key);
-    startupMeasures[key].log();
-    console.log();
-  }
-
-  // Run only startup benchmark
-  process.exit();
 }
+
+for (const key in startupMeasures) {
+  console.log('Startup time:', key);
+  startupMeasures[key].log();
+  console.log();
+}
+
+if (MEASURE_STARTUP) process.exit();
 
 // Register to mitata
 casesMap.forEach((val, key) => {
@@ -88,4 +82,4 @@ casesMap.forEach((val, key) => {
   });
 });
 
-await run();
+run();

@@ -11,7 +11,6 @@ export const __compileLimits = (
 ): string => {
   let str = '';
 
-  // @ts-ignore
   while (start < arr.length) {
     // @ts-ignore
     const limit = arr[start++];
@@ -98,22 +97,22 @@ export const __compile = (
       ')';
   else if (id === 16) {
     str += (isNil ? '' : i + '!==null&&') + 'typeof ' + i + '==="object"';
+    i += '.';
 
     // @ts-ignore Required
-    if (t[1] != null)
+    if (t[1] != null) {
       // @ts-ignore Required
-      for (const key in t[1]) {
-        // @ts-ignore Required
-        str += '&&' + __compile(t[1][key], i + '.' + key, deps, false);
-      }
+      const o = t[1];
+      for (const key in o)
+        str += '&&' + __compile(o[key], i + key, deps, false);
+    }
 
     // @ts-ignore Optional
-    if (t[2] != null)
-      // @ts-ignore Optional
-      for (const key in t[2]) {
-        // @ts-ignore Optional
-        str += '&&' + __compile(t[2][key], i + '.' + key, deps, true);
-      }
+    if (t[2] != null) {
+      // @ts-ignore Required
+      const o = t[2];
+      for (const key in o) str += '&&' + __compile(o[key], i + key, deps, true);
+    }
   } else if (id === 18) {
     // @ts-ignore
     const list: any[] = t[1];
@@ -128,31 +127,33 @@ export const __compile = (
 
     // @ts-ignore Map
     for (const key in t[2]) {
+      // @ts-ignore
+      const schema = t[2][key];
       // @ts-ignore Map
       str += tag + '===' + JSON.stringify(key) + '?';
 
       let first = true;
-      // @ts-ignore Required
-      for (const key in t[1]) {
-        if (first) {
-          first = false;
-          str += '&&';
-        }
-        // @ts-ignore Required
-        str += __compile(t[1][key], i + '.' + key, deps, false);
-      }
-
-      // @ts-ignore Optional
-      if (t[2] != null)
-        // @ts-ignore Optional
-        for (const key in t[2]) {
+      if (schema[1] != null) {
+        const o = schema[1];
+        for (const key in o) {
           if (first) {
             first = false;
             str += '&&';
           }
-          // @ts-ignore Optional
-          str += __compile(t[2][key], i + '.' + key, deps, true);
+          str += __compile(o[key], i + '.' + key, deps, false);
         }
+      }
+
+      if (schema[2] != null) {
+        const o = schema[2];
+        for (const key in o) {
+          if (first) {
+            first = false;
+            str += '&&';
+          }
+          str += __compile(o[key], i + '.' + key, deps, true);
+        }
+      }
 
       str += ':';
     }
@@ -166,13 +167,12 @@ export const __compile = (
     const scopeDeps: string[] = [];
 
     // @ts-ignore Scope deps
-    if (t[2] != null)
-      // @ts-ignore Scope deps
-      for (const key in t[2]) {
-        scope +=
-          // @ts-ignore Scope deps
-          'd' + key + '=' + __compileToFn(t[2][key], scopeDeps) + ',';
-      }
+    if (t[2] != null) {
+      // @ts-ignore
+      const depsObj = t[2];
+      for (const key in depsObj)
+        scope += 'd' + key + '=' + __compileToFn(depsObj[key], scopeDeps) + ',';
+    }
 
     // @ts-ignore Scope main type
     const main = optimizeDirectCall(__compileToFn(t[1], scopeDeps));

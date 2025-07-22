@@ -190,7 +190,7 @@ const user = {
 ```
 
 ### Assert JSON
-To compile a schema to a JSON type assertion function:
+To compile a schema to a JSON type assertion function (require `Function` for code generation):
 ```ts
 const isUser = build.json.assert.compile(schema);
 if (isUser(user)) {

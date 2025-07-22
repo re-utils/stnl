@@ -1,7 +1,5 @@
 import type { TInfer, TLoadedType } from '../../type.js';
 
-// TODO: Optimize unions and constants
-
 // Hardcode cases that can be optimized
 const __number_list = (o: any[]) => {
   let _ = '[';
@@ -34,13 +32,14 @@ export const compile = <T extends TLoadedType>(
     // @ts-ignore
     const list: string[] = t[1];
 
-    let code = 'return o=>';
-    for (let i = 1; i < list.length; i++) {
-      const key = JSON.stringify(list[i]);
-      code += 'o===' + key + '?"\\' + key + '\\":';
-    }
+    // Matching with objects is faster than string comparison
+    // Only if the object is not deoptimized
+    const obj: Record<string, string> = {};
 
-    return Function(code + '"\\' + JSON.stringify(list[0]) + '"\\')();
+    for (let i = 0; i < list.length; i++)
+      obj[list[i]] = JSON.stringify(list[i]);
+
+    return (a) => obj[a];
   }
 
   if (id === 14) {
