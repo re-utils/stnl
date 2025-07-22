@@ -30,7 +30,6 @@ for (const c of cases) {
     const createFn = c.tests[test];
 
     // Measure startup time of the init fn
-
     if (
       MEASURE_STARTUP &&
       includeStartupCase(name) &&
