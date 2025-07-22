@@ -26,7 +26,7 @@ if (process.argv.includes('--help')) {
 
 const casesMap = new Map<string, [string, ReturnType<Tests[keyof Tests]>][]>();
 
-if (!process.argv.includes('--no-startup')) {
+if (process.argv.includes('--startup')) {
   const startupMeasures: Record<string, ReturnType<typeof measureStartup>> = {};
 
   // Map cases
@@ -55,7 +55,7 @@ if (!process.argv.includes('--no-startup')) {
   }
 
   // Run only startup benchmark
-  if (process.argv.includes('--only-startup')) process.exit();
+  process.exit();
 }
 
 // Register to mitata

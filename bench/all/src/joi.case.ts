@@ -23,7 +23,7 @@ export default defineCase({
       const opts = {
         presence: 'required',
         abortEarly: true,
-        allowUnknown: true
+        allowUnknown: true,
       } satisfies joi.ValidationOptions;
       return (o) => schema.validate(o, opts).error == null;
     },
