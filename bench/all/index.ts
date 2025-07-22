@@ -40,7 +40,7 @@ if (!process.argv.includes('--no-startup')) {
 
       // Measure startup time of the init fn
       if (includeStartupCase(name) && !excludeStartupCase(name))
-        await (startupMeasures[test] ??= measureStartup()).run(name, createFn);
+        (startupMeasures[test] ??= measureStartup()).run(name, createFn);
 
       const obj = [name, createFn()] as [any, any];
       if (casesMap.has(test)) casesMap.get(test)!.push(obj);
@@ -50,10 +50,7 @@ if (!process.argv.includes('--no-startup')) {
 
   for (const key in startupMeasures) {
     console.log('Startup time:', key);
-    {
-      const measures = startupMeasures[key];
-      measures.log();
-    }
+    startupMeasures[key].log();
     console.log();
   }
 

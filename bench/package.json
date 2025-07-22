@@ -2,15 +2,17 @@
   "dependencies": {
     "@badrap/valita": "^0.4.5",
     "@effect/schema": "^0.75.5",
+    "@inbestigator/vali": "npm:@jsr/inbestigator__vali",
     "@sinclair/typebox": "^0.34.37",
     "@zod/mini": "^4.0.0-beta.0",
     "ajv": "^8.17.1",
     "arktype": "^2.1.20",
+    "joi": "^17.13.3",
     "json-accelerator": "^0.1.7",
+    "picocolors": "^1.1.1",
     "typia": "^7.6.4",
     "valibot": "^1.1.0",
-    "zod": "^4.0.5",
-    "picocolors": "^1.1.1"
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@ark/attest": "^0.48.2",

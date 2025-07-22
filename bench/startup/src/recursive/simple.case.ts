@@ -7,13 +7,13 @@ import { defineTest } from '@lib';
 import { type } from 'arktype';
 const f = defineTest();
 
-await f.run('stnl', () =>
+f.run('stnl', () =>
   build.json.assert.compile(
     t.scope(t.dict({ name: t.string }, { next: t.self })),
   ),
 );
 
-await f.run('typebox', () =>
+f.run('typebox', () =>
   Function(
     TypeCompiler.Code(
       Type.Recursive((This) =>
@@ -27,7 +27,7 @@ await f.run('typebox', () =>
   )(),
 );
 
-await f.run('ajv', () =>
+f.run('ajv', () =>
   new Ajv().compile({
     definitions: {
       self: {
@@ -44,7 +44,7 @@ await f.run('ajv', () =>
   }),
 );
 
-await f.run('arktype', () =>
+f.run('arktype', () =>
   type.module({
     self: {
       name: 'string',

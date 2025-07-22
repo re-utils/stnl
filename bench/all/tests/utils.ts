@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-export const randomStr = (l = 0) => {
+export const randomStr = (l = 2) => {
   let str = '';
   while (l-- > 0) str += randomUUID();
   return str;

@@ -7,7 +7,7 @@ import { defineTest } from '@lib';
 import { type } from 'arktype';
 const f = defineTest();
 
-await f.run('stnl', () =>
+f.run('stnl', () =>
   build.json.assert.compile(
     t.scope(
       t.dict(
@@ -73,7 +73,7 @@ await f.run('stnl', () =>
   ),
 );
 
-await f.run('typebox', () => {
+f.run('typebox', () => {
   const mod = Type.Module({
     project: Type.Object({
       id: Type.Ref('uuid'),
@@ -137,7 +137,7 @@ await f.run('typebox', () => {
   return Function(TypeCompiler.Code(mod, []))();
 });
 
-await f.run('ajv', () =>
+f.run('ajv', () =>
   new Ajv().compile({
     definitions: {
       uuid: {
@@ -215,7 +215,7 @@ await f.run('ajv', () =>
   }),
 );
 
-await f.run('arktype', () =>
+f.run('arktype', () =>
   type.module({
     project: {
       id: 'uuid',

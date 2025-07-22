@@ -12,12 +12,12 @@ const valid = () => ({
   data: {
     number: Math.random() * 18,
     negNumber: Math.random() * -20,
-    maxNumber: Number.MAX_VALUE,
-    string: randomStr(),
+    maxNumber: Number.MAX_SAFE_INTEGER,
+    string: randomStr(2),
     longString: randomStr(8),
     boolean: Math.random() < 0.5,
     deeplyNested: {
-      foo: randomStr(),
+      foo: randomStr(2),
       num: Math.random() * 78,
       bool: Math.random() > 0.5,
     },
