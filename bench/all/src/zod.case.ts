@@ -3,6 +3,7 @@ import { array, boolean, number, object, string } from 'zod';
 
 export default defineCase({
   name: 'zod',
+  url: import.meta.url,
   tests: {
     assertLoose() {
       const schema = object({

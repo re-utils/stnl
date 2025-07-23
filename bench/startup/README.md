@@ -1,8 +1,11 @@
-Benchmark startup time of JIT validators.
+Startup & size benchmark:
 ```sh
-# Run in Node
-bun index.ts node
+# Prepare all files for benchmark
+bun prep
 
-# Run in Bun
-bun index.ts
+# Bench with Bun runtime
+bun bench:bun
+
+# Bench with Node runtime
+bun bench:node
 ```

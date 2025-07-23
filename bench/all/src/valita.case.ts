@@ -3,6 +3,7 @@ import { array, boolean, number, object, string } from '@badrap/valita';
 
 export default defineCase({
   name: '@badrap/valita',
+  url: import.meta.url,
   tests: {
     assertLoose() {
       const schema = object({

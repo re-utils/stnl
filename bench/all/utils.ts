@@ -6,6 +6,7 @@ export interface Tests {
 
 export interface Case {
   name: string;
+  url: string;
   tests: Partial<Tests>;
 }
 

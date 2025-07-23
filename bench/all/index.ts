@@ -4,8 +4,6 @@ import type { Tests } from './utils.js';
 import tests from './tests/index.js';
 import cases from './src/index.js';
 
-import { defineTest as measureStartup } from '../startup/lib.js';
-
 import {
   excludeCase,
   includeCase,
@@ -15,10 +13,7 @@ import {
   excludeStartupCase,
 } from './filter.js';
 
-const MEASURE_STARTUP = process.argv.includes('--startup');
-
 const casesMap = new Map<string, [string, ReturnType<Tests[keyof Tests]>][]>();
-const startupMeasures: Record<string, ReturnType<typeof measureStartup>> = {};
 
 // Map cases
 for (const c of cases) {
@@ -27,29 +22,11 @@ for (const c of cases) {
 
   for (const test in c.tests) {
     // @ts-ignore
-    const createFn = c.tests[test];
-
-    // Measure startup time of the init fn
-    if (
-      MEASURE_STARTUP &&
-      includeStartupCase(name) &&
-      !excludeStartupCase(name)
-    )
-      (startupMeasures[test] ??= measureStartup()).run(name, createFn);
-
-    const obj = [name, createFn()] as [any, any];
+    const obj = [name, c.tests[test]()] as [any, any];
     if (casesMap.has(test)) casesMap.get(test)!.push(obj);
     else casesMap.set(test, [obj]);
   }
 }
-
-for (const key in startupMeasures) {
-  console.log('Startup time:', key);
-  startupMeasures[key].log();
-  console.log();
-}
-
-if (MEASURE_STARTUP) process.exit();
 
 // Register to mitata
 casesMap.forEach((val, key) => {

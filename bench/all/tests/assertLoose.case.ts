@@ -3,14 +3,16 @@ import { randomStr, randRemoveProp } from './utils.js';
 function trueValidator(this: { data: any }, fn: (o: any) => boolean) {
   // Support validator that throws and not throw
   const res = fn(this.data);
-  if (res !== true && res !== undefined) throw new Error('A validator is invalid!');
+  if (res !== true && res !== undefined)
+    throw new Error('A validator is invalid!');
 }
 
 function falseValidator(this: { data: any }, fn: (o: any) => boolean) {
   // Support validator that throws and not throw
   try {
     const res = fn(this.data);
-    if (res === true || res === undefined) throw new Error('A validator is invalid!');
+    if (res === true || res === undefined)
+      throw new Error('A validator is invalid!');
   } catch {}
 }
 

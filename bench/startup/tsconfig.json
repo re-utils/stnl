@@ -5,7 +5,7 @@
     // Paths
     "paths": {
       "stnl": ["../../src/index.ts"],
-      "@lib": ["./lib.ts"]
+      "@utils": ["./utils.ts"]
     },
     "strictNullChecks": true,
     "strict": true

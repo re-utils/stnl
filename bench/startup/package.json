@@ -1,3 +1,8 @@
 {
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "prep": "bun build.ts",
+    "bench:bun": "BUN_JSC_useDFGJIT=0 bun index.ts",
+    "bench:node": "bun tsx --no-opt --expose-gc index.ts"
+  }
 }

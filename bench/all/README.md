@@ -15,8 +15,6 @@ bun prep # Prepare test suites
 
 bun bench:bun # Bun
 bun bench:node # Node
-
-bun bench:bun --startup # Only run startup time bench
 ```
 
 ## Tests
