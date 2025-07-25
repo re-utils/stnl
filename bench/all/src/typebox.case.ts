@@ -9,7 +9,6 @@ TypeSystemPolicy.AllowNaN = true;
 
 export default defineCase({
   name: '@sinclair/typebox',
-  url: import.meta.url,
   tests: {
     assertLoose() {
       const schema = Type.Object({

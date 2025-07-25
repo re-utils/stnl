@@ -3,7 +3,6 @@ import { array, assert, boolean, number, object, string } from 'valibot';
 
 export default defineCase({
   name: 'valibot',
-  url: import.meta.url,
   tests: {
     assertLoose() {
       const schema = object({
