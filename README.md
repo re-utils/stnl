@@ -172,6 +172,37 @@ const int_node = t.scope(node, {
 });
 ```
 
+## Modules
+Modules can also be used for storing types that depends on other types.
+```ts
+const mod = t.module({
+  value: t.string,
+
+  node: t.dict({
+    prefix: t.string,
+    store: t.ref('value')
+  }, {
+    param: t.ref('param_node'),
+    child: t.ref('node')
+  }),
+
+  param_node: t.dict({
+    name: t.string
+  }, {
+    store: t.ref('value'),
+    child: t.ref('node')
+  }),
+});
+
+// Use module schemas
+const schema = t.dict({
+  root: mod.node,
+  param_root: mod.param_node
+});
+```
+
+You should only use `t.module()` when you need to re-use types in a scope.
+
 ## Compatibility
 Translate `stnl` schema to other formats.
 

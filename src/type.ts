@@ -229,3 +229,16 @@ interface FScope {
  * Resolve some unresolved references of a type
  */
 export const scope: FScope = ((t: any, r: any) => [24, t, r]) as any;
+
+/**
+ * Create a type module
+ * @param t
+ */
+export const module = <const T extends Record<string, IType>>(t: T): {
+  [K in keyof T]: TScope<T[K], T>
+} => {
+  const mod: Record<string, any> = {};
+  for (const key in t)
+    mod[key] = scope(ref(key), t);
+  return mod as any;
+};
