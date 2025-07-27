@@ -1,9 +1,9 @@
 import type { TFloat, TInt, TString } from './type.js';
 
 // Type constraints
-declare const _c: unique symbol;
 export interface Limit<I extends number = number> {
-  [_c]: I;
+  [0]: I;
+  1: any;
 }
 
 /**
