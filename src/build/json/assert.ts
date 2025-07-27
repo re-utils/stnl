@@ -11,6 +11,7 @@ export const __compileLimits = (
 ): string => {
   let str = '';
 
+  // @ts-ignore
   while (start < arr.length) {
     // @ts-ignore
     const limit = arr[start++];

@@ -33,6 +33,7 @@ const __loadLimits = (
   schema: TLoadedType,
   idx: number,
 ) => {
+  // @ts-ignore
   if (schema.length > idx)
     do {
       // @ts-ignore
@@ -44,6 +45,7 @@ const __loadLimits = (
       else if (id === 2) o.minLength = limit[1];
       else if (id === 3) o.maxLength = limit[1];
       else if (id === 4) o.minLength = o.maxLength = limit[1];
+      // @ts-ignore
     } while (idx < schema.length);
   return o;
 };

@@ -14,7 +14,6 @@ export interface IType<
 > extends Ref<R> {
   0: I;
   [_]: T;
-  length: number;
 }
 export type TLoadedType = IType<number, any, never>;
 
