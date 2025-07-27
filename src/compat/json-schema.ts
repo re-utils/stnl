@@ -141,11 +141,21 @@ const __parse = (id: number, t: TLoadedType) => {
     return { $ref: t[1] };
 
   if (id === 24) {
-    const defs: Record<string, any> = {};
+    const defs: TSchema['$defs'] = {};
 
     // @ts-ignore
     const refs = t[2];
-    for (const name in refs) defs[name] = f(refs[name]);
+    for (const name in refs) {
+      let subschema = f(refs[name]);
+
+      // Prevent scope nesting bug
+      if (subschema.$id == null)
+        subschema.$id = name;
+      else
+        subschema = { $id: name, anyOf: [subschema] };
+
+      defs[name] = subschema;
+    }
 
     // @ts-ignore
     const root = f(t[1]);
