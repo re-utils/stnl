@@ -172,6 +172,27 @@ const int_node = t.scope(node, {
 });
 ```
 
+## Compatibility
+Translate `stnl` schema to other formats.
+
+### JSON schema
+Convert `stnl` schema to 2020-12 spec JSON schema.
+```ts
+import { compat } from 'stnl';
+
+const schema = compat.toJSONSchema(
+  t.dict({
+    name: l.string(l.minLen(3), l.maxLen(16)),
+    code: l.string(l.minLen(8), l.maxLen(32))
+  })
+);
+
+// Set schema version for root schema (has type hint)
+schema.$schema = 'https://json-schema.org/draft/2020-12/schema';
+```
+
+Type inference for JSON schema is impossible with the current inference system.
+
 ## Compilers
 `stnl` schema compilers.
 ```ts

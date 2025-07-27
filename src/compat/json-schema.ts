@@ -1,10 +1,33 @@
-import { l } from '../../lib/index.js';
 import type { TLoadedType } from '../type.js';
 
-export const null_t = { type: 'null' } as const;
+/**
+ * Describe possible output keys
+ */
+interface TSchema {
+  $schema?: 'https://json-schema.org/draft/2020-12/schema';
+  $defs?: Record<string, TSchema>;
+  $id?: string;
+  $ref?: string;
 
+  anyOf?: TSchema[];
+
+  type?: 'boolean' | 'null' | 'integer' | 'number' | 'string' | 'object' | 'array';
+  const?: unknown;
+
+  items?: TSchema | false;
+  prefixItems?: TSchema[];
+
+  properties?: Record<string, TSchema>;
+  required?: string[];
+
+  minimum?: number;
+  maximum?: number;
+  minLength?: number;
+  maxLength?: number;
+};
+
+const __null = { const: 'null' } as const;
 const __create_const = (v: any) => ({ const: v });
-
 const __loadLimits = (
   o: Record<string, any>,
   schema: TLoadedType,
@@ -24,7 +47,6 @@ const __loadLimits = (
     } while (idx < schema.length);
   return o;
 };
-
 const __parse = (id: number, t: TLoadedType) => {
   if (id === 0) return __loadLimits({ type: 'integer' }, t, 1);
   if (id === 2) return __loadLimits({ type: 'number' }, t, 1);
@@ -86,12 +108,11 @@ const __parse = (id: number, t: TLoadedType) => {
     const map = t[2];
 
     for (const value in map) {
-      const type = map[value];
-
       // Set tag value
       const props: Record<string, any> = {};
-      props[tag] = value;
+      props[tag] = __create_const(value);
 
+      const type = map[value];
       // @ts-ignore
       const requiredProps = type[1];
       for (const key in requiredProps) props[key] = f(requiredProps[key]);
@@ -107,6 +128,7 @@ const __parse = (id: number, t: TLoadedType) => {
       });
     }
 
+    // More compact schema instead of type object on every subschema
     return {
       type: 'object',
       required: [tag],
@@ -133,10 +155,15 @@ const __parse = (id: number, t: TLoadedType) => {
     return root;
   }
 
+  // Any type
   return {};
 };
 
-const f = (t: TLoadedType): Record<string, any> =>
-  (t[0] & 1) === 1 ? { anyOf: [null_t, __parse(t[0], t)] } : __parse(t[0], t);
+/**
+ * Convert a stnl schema to 2020-12 spec JSON schema
+ * @param t
+ */
+const f = (t: TLoadedType): TSchema =>
+  (t[0] & 1) === 1 ? { anyOf: [__null, __parse(t[0], t)] } : __parse(t[0], t);
 
 export default f;
