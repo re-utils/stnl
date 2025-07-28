@@ -4,7 +4,8 @@
     "isolatedDeclarations": false,
     // Paths
     "paths": {
-      "stnl": ["../../src/index.ts"],
+      "stnl": ["../../lib/index"],
+      "stnl/*": ["../../lib/*"],
       "@utils": ["./utils.ts"]
     },
     "strictNullChecks": true,

@@ -172,10 +172,10 @@ const __parse = (id: number, t: TLoadedType) => {
 };
 
 /**
- * Convert a stnl schema to 2020-12 spec JSON schema
+ * Convert stnl schema to 2020-12 spec JSON schema
  * @param t
  */
 const f = (t: TLoadedType): TSchema =>
-  (t[0] & 1) === 1 ? { anyOf: [__null, __parse(t[0], t)] } : __parse(t[0], t);
+  (t[0] & 1) === 1 ? { anyOf: [__null, __parse(t[0] - 1, t)] } : __parse(t[0], t);
 
 export default f;

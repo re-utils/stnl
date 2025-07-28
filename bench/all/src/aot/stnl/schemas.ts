@@ -1,6 +1,7 @@
-import { t, build } from 'stnl';
+import { t } from 'stnl';
+import { code } from 'stnl/build/json/assert';
 
-export const assertLoose = build.json.assert.code(
+export const assertLoose = code(
   t.dict({
     number: t.float,
     negNumber: t.float,

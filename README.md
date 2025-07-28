@@ -172,7 +172,7 @@ const int_node = t.scope(node, {
 });
 ```
 
-## Modules
+### Modules
 Modules can also be used for storing types that depends on other types.
 ```ts
 const mod = t.module({
@@ -230,14 +230,10 @@ Due to the inference strategy of the current system, type inference for JSON sch
 ### Standard schema
 Convert `stnl` to a [standard schema](https://standardschema.dev).
 ```ts
-const schema = compat.toStandardSchema.v1(
-  build.json.assert.compile(user),
-  // Error message
-  'User validation failed'
-);
+const schema = compat.standardSchema.toV1(user, 'User validation failed');
 
 // Use standard schema
-schema['~standard'].validate({});
+console.log(schema['~standard'].validate({}));
 ```
 
 ## Compilers
@@ -260,22 +256,17 @@ const user = {
 ### Assert JSON
 To compile a schema to a JSON type assertion function (require `Function` for code generation):
 ```ts
-const isUser = build.json.assert.compile(schema);
+const isUser = build.json.assert(schema);
 if (isUser(user)) {
   console.log('Name', user.name);
   console.log('Code', user.code);
 }
 ```
 
-For code injection to other functions:
-```ts
-console.log(build.json.assert.code(schema));
-```
-
 ### Stringify JSON
 To compile a schema to an optimized JSON stringifier function:
 ```ts
-const stringifyUser = build.json.stringify.compile(schema);
+const stringifyUser = build.json.stringify(schema);
 if (isUser(user))
   console.log(stringifyUser(user) === JSON.stringify(user)); // true
 ```

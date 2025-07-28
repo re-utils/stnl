@@ -1,10 +1,7 @@
 import type { TInfer, TLoadedType } from '../../type.js';
 import { optimizeDirectCall } from '../utils.js';
 
-/**
- * @private
- */
-export const __compileLimits = (
+export const compileLimits = (
   arr: TLoadedType,
   start: number,
   i: string,
@@ -35,16 +32,10 @@ export const __compileLimits = (
   return str;
 };
 
-/**
- * @private
- */
-export const __compileToFn = (t: TLoadedType, deps: string[]): string =>
-  'o=>' + __compile(t, 'o', deps, false);
+export const compileToFn = (t: TLoadedType, deps: string[]): string =>
+  'o=>' + compile(t, 'o', deps, false);
 
-/**
- * @private
- */
-export const __compile = (
+export const compile = (
   t: TLoadedType,
   i: string,
   deps: string[],
@@ -62,11 +53,11 @@ export const __compile = (
   } else if (optional) str += '(' + i + '===void 0||';
 
   const wrapped = isNil || optional;
-  if (id === 0) str += 'Number.isInteger(' + i + ')' + __compileLimits(t, 1, i);
+  if (id === 0) str += 'Number.isInteger(' + i + ')' + compileLimits(t, 1, i);
   else if (id === 2)
-    str += 'typeof ' + i + '==="number"' + __compileLimits(t, 1, i);
+    str += 'typeof ' + i + '==="number"' + compileLimits(t, 1, i);
   else if (id === 4)
-    str += 'typeof ' + i + '==="string"' + __compileLimits(t, 1, i);
+    str += 'typeof ' + i + '==="string"' + compileLimits(t, 1, i);
   else if (id === 6) str += 'typeof ' + i + '==="boolean"';
   else if (id === 8) str += i + '!==void 0';
   else if (id === 10) {
@@ -89,12 +80,12 @@ export const __compile = (
       'Array.isArray(' +
       i +
       ')' +
-      __compileLimits(t, 2, i) +
+      compileLimits(t, 2, i) +
       '&&' +
       i +
       '.every(d' +
       // @ts-ignore Compile item
-      deps.push(optimizeDirectCall(__compileToFn(t[1], deps))) +
+      deps.push(optimizeDirectCall(compileToFn(t[1], deps))) +
       ')';
   else if (id === 16) {
     str += (isNil ? '' : i + '!==null&&') + 'typeof ' + i + '==="object"';
@@ -105,14 +96,15 @@ export const __compile = (
       // @ts-ignore Required
       const o = t[1];
       for (const key in o)
-        str += '&&' + __compile(o[key], i + key, deps, false);
+        str += '&&' + compile(o[key], i + key, deps, false);
     }
 
     // @ts-ignore Optional
     if (t[2] != null) {
       // @ts-ignore Required
       const o = t[2];
-      for (const key in o) str += '&&' + __compile(o[key], i + key, deps, true);
+      for (const key in o)
+        str += '&&' + compile(o[key], i + key, deps, true);
     }
   } else if (id === 18) {
     // @ts-ignore
@@ -120,7 +112,7 @@ export const __compile = (
     str += 'Array.isArray(' + i + ')&&' + i + '.length===' + list.length;
 
     for (let j = 0; j < list.length; j++)
-      str += '&&' + __compile(list[j], i + '[' + j + ']', deps, false);
+      str += '&&' + compile(list[j], i + '[' + j + ']', deps, false);
   } else if (id === 20) {
     str += (isNil ? '' : i + '!==null&&') + 'typeof ' + i + '==="object"&&(';
     i += '.';
@@ -142,7 +134,7 @@ export const __compile = (
             first = false;
             str += '&&';
           }
-          str += __compile(o[key], i + key, deps, false);
+          str += compile(o[key], i + key, deps, false);
         }
       }
 
@@ -153,7 +145,7 @@ export const __compile = (
             first = false;
             str += '&&';
           }
-          str += __compile(o[key], i + key, deps, true);
+          str += compile(o[key], i + key, deps, true);
         }
       }
 
@@ -173,11 +165,11 @@ export const __compile = (
       // @ts-ignore
       const depsObj = t[2];
       for (const key in depsObj)
-        scope += 'd' + key + '=' + __compileToFn(depsObj[key], scopeDeps) + ',';
+        scope += 'd' + key + '=' + compileToFn(depsObj[key], scopeDeps) + ',';
     }
 
     // @ts-ignore Scope main type
-    const main = optimizeDirectCall(__compileToFn(t[1], scopeDeps));
+    const main = optimizeDirectCall(compileToFn(t[1], scopeDeps));
     for (let i = 0; i < scopeDeps.length; i++)
       scope += 'd' + (i + 1) + '=' + scopeDeps[i] + ',';
 
@@ -188,28 +180,29 @@ export const __compile = (
   return wrapped ? str + ')' : str;
 };
 
+export const dependencies = (deps: string[]): string => {
+  let res = '';
+  if (deps.length > 0) {
+    for (let i = 0; i < deps.length; i++)
+      res += (i === 0 ? 'var d' : ',d') + (i + 1) + '=' + deps[i];
+  }
+  return res;
+}
+
 /**
  * Get the compiled assertion code of a schema
  * @param t
  */
 export const code = (t: TLoadedType): string => {
   const deps: string[] = [];
-
-  let res = '"use strict"';
-  const str = optimizeDirectCall(__compileToFn(t, deps));
-
-  if (deps.length > 0) {
-    for (let i = 0; i < deps.length; i++)
-      res += (i === 0 ? ';var d' : ',d') + (i + 1) + '=' + deps[i];
-  }
-
-  return res + ';return ' + str;
+  const str = optimizeDirectCall(compileToFn(t, deps));
+  return dependencies(deps) + ';return ' + str;
 };
 
 /**
  * Get the compiled assertion function of a schema
  * @param t
  */
-export const compile = <T extends TLoadedType>(
+export default <T extends TLoadedType>(
   t: T,
 ): ((o: any) => o is TInfer<T>) => Function(code(t))();

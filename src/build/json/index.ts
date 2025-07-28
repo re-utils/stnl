@@ -1,2 +1,2 @@
-export * as assert from './assert.js';
-export * as stringify from './stringify.js';
+export { default as assert } from './assert.js';
+export { default as stringify } from './stringify.js';
