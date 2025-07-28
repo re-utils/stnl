@@ -1,6 +1,6 @@
 {
   "name": "stnl",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "A simple, opinionated type validator built for performance",
   "keywords": [
     "validator",
@@ -36,5 +36,8 @@
   },
   "trustedDependencies": [
     "@biomejs/biome"
-  ]
+  ],
+  "optionalDependencies": {
+    "@standard-schema/spec": "^1.0.0"
+  }
 }

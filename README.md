@@ -205,24 +205,40 @@ You should only use `t.module()` when you need to re-use types in a scope.
 
 ## Compatibility
 Translate `stnl` schema to other formats.
+```ts
+import { compat, build, t, l } from 'stnl';
+
+// Used for examples below
+const user = t.dict({
+  name: l.string(l.minLen(3), l.maxLen(16)),
+  code: l.string(l.minLen(8), l.maxLen(32))
+});
+```
 
 ### JSON schema
-Convert `stnl` schema to 2020-12 spec JSON schema.
+Convert `stnl` schema to a [JSON schema](https://json-schema.org/).
 ```ts
-import { compat } from 'stnl';
-
-const schema = compat.toJSONSchema(
-  t.dict({
-    name: l.string(l.minLen(3), l.maxLen(16)),
-    code: l.string(l.minLen(8), l.maxLen(32))
-  })
-);
+// 2020-12 spec schema
+const schema = compat.toJSONSchema(user);
 
 // Set schema version for root schema (has type hint)
 schema.$schema = 'https://json-schema.org/draft/2020-12/schema';
 ```
 
-Type inference for JSON schema is impossible with the current inference system.
+Due to the inference strategy of the current system, type inference for JSON schema is impossible.
+
+### Standard schema
+Convert `stnl` to a [standard schema](https://standardschema.dev).
+```ts
+const schema = compat.toStandardSchema.v1(
+  build.json.assert.compile(user),
+  // Error message
+  'User validation failed'
+);
+
+// Use standard schema
+schema['~standard'].validate({});
+```
 
 ## Compilers
 `stnl` schema compilers.
