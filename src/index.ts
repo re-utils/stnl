@@ -5,5 +5,4 @@ export * as l from './limit.js';
 export * as limit from './limit.js';
 
 export * as build from './build/index.js';
-export * as regex from './regex.js';
 export * as compat from './compat/index.js';

@@ -122,9 +122,14 @@ const __parse = (id: number, t: TLoadedType) => {
       props[tag] = __create_const(value);
 
       const type = map[value];
+
       // @ts-ignore
       const requiredProps = type[1];
-      for (const key in requiredProps) props[key] = f(requiredProps[key]);
+      const requiredList: string[] = [];
+      for (const key in requiredProps) {
+        props[key] = f(requiredProps[key]);
+        requiredList.push(key);
+      }
 
       // @ts-ignore
       const optionalProps = type[2];
@@ -133,7 +138,7 @@ const __parse = (id: number, t: TLoadedType) => {
 
       schemas.push({
         properties: props,
-        required: Object.keys(requiredProps),
+        required: requiredList,
       });
     }
 
