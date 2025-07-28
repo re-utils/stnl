@@ -228,7 +228,7 @@ schema.$schema = 'https://json-schema.org/draft/2020-12/schema';
 Due to the inference strategy of the current system, type inference for JSON schema is impossible.
 
 ### Standard schema
-Convert `stnl` to a [standard schema](https://standardschema.dev).
+Convert `stnl` to a [standard schema](https://standardschema.dev) (require `Function` for code generation).
 ```ts
 const schema = compat.standardSchema.toV1(user, 'User validation failed');
 

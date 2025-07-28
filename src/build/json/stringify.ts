@@ -20,9 +20,7 @@ const __bool = (o: boolean) => (o ? 'true' : 'false');
  * Get the compiled stringifier of a schema
  * @param t
  */
-export default <T extends TLoadedType>(
-  t: T,
-): ((o: TInfer<T>) => string) => {
+export default <T extends TLoadedType>(t: T): ((o: TInfer<T>) => string) => {
   let id = t[0];
 
   if (id === 0 || id === 2) return __number;

@@ -11,7 +11,14 @@ interface TSchema {
 
   anyOf?: TSchema[];
 
-  type?: 'boolean' | 'null' | 'integer' | 'number' | 'string' | 'object' | 'array';
+  type?:
+    | 'boolean'
+    | 'null'
+    | 'integer'
+    | 'number'
+    | 'string'
+    | 'object'
+    | 'array';
   const?: unknown;
 
   items?: TSchema | false;
@@ -24,7 +31,7 @@ interface TSchema {
   maximum?: number;
   minLength?: number;
   maxLength?: number;
-};
+}
 
 const __null = { const: 'null' } as const;
 const __create_const = (v: any) => ({ const: v });
@@ -151,10 +158,8 @@ const __parse = (id: number, t: TLoadedType) => {
       let subschema = f(refs[name]);
 
       // Prevent scope nesting bug
-      if (subschema.$id == null)
-        subschema.$id = name;
-      else
-        subschema = { $id: name, anyOf: [subschema] };
+      if (subschema.$id == null) subschema.$id = name;
+      else subschema = { $id: name, anyOf: [subschema] };
 
       defs[name] = subschema;
     }
@@ -176,6 +181,8 @@ const __parse = (id: number, t: TLoadedType) => {
  * @param t
  */
 const f = (t: TLoadedType): TSchema =>
-  (t[0] & 1) === 1 ? { anyOf: [__null, __parse(t[0] - 1, t)] } : __parse(t[0], t);
+  (t[0] & 1) === 1
+    ? { anyOf: [__null, __parse(t[0] - 1, t)] }
+    : __parse(t[0], t);
 
 export default f;

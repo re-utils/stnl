@@ -95,16 +95,14 @@ export const compile = (
     if (t[1] != null) {
       // @ts-ignore Required
       const o = t[1];
-      for (const key in o)
-        str += '&&' + compile(o[key], i + key, deps, false);
+      for (const key in o) str += '&&' + compile(o[key], i + key, deps, false);
     }
 
     // @ts-ignore Optional
     if (t[2] != null) {
       // @ts-ignore Required
       const o = t[2];
-      for (const key in o)
-        str += '&&' + compile(o[key], i + key, deps, true);
+      for (const key in o) str += '&&' + compile(o[key], i + key, deps, true);
     }
   } else if (id === 18) {
     // @ts-ignore
@@ -187,7 +185,7 @@ export const dependencies = (deps: string[]): string => {
       res += (i === 0 ? 'var d' : ',d') + (i + 1) + '=' + deps[i];
   }
   return res;
-}
+};
 
 /**
  * Get the compiled assertion code of a schema
@@ -203,6 +201,5 @@ export const code = (t: TLoadedType): string => {
  * Get the compiled assertion function of a schema
  * @param t
  */
-export default <T extends TLoadedType>(
-  t: T,
-): ((o: any) => o is TInfer<T>) => Function(code(t))();
+export default <T extends TLoadedType>(t: T): ((o: any) => o is TInfer<T>) =>
+  Function(code(t))();

@@ -8,15 +8,22 @@ import type { TLoadedType, TInfer } from '../type.js';
  * @param t
  * @param errorMessage
  */
-export const toV1 = <T extends TLoadedType>(t: T, errorMessage: string): StandardSchemaV1<any, TInfer<T>> => {
-  const deps: string[] = ['{issues:[{message:' + JSON.stringify(errorMessage) + '}]}'];
+export const toV1 = <T extends TLoadedType>(
+  t: T,
+  errorMessage: string,
+): StandardSchemaV1<any, TInfer<T>> => {
+  const deps: string[] = [
+    '{issues:[{message:' + JSON.stringify(errorMessage) + '}]}',
+  ];
   const str = compile(t, 'o', deps, false);
 
   return {
     '~standard': {
       version: 1,
       vendor: 'stnl',
-      validate: Function(dependencies(deps) + ';return o=>' + str + '?{value:o}:d1')()
-    }
-  }
+      validate: Function(
+        dependencies(deps) + ';return o=>' + str + '?{value:o}:d1',
+      )(),
+    },
+  };
 };

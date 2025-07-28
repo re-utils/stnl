@@ -2,12 +2,15 @@ import { l, t } from 'stnl';
 import { schema } from './utils.js';
 
 const A = t.scope(
-  t.dict({
-    x: t.ref('x'),
-    y: t.ref('y')
-  }, {
-    next: t.self
-  }),
+  t.dict(
+    {
+      x: t.ref('x'),
+      y: t.ref('y'),
+    },
+    {
+      next: t.self,
+    },
+  ),
   { x: t.int },
 );
 
@@ -23,7 +26,7 @@ mock([
     y: 6,
     next: {
       x: 7,
-      y: 8
+      y: 8,
     },
   },
 ]);
