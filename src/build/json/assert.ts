@@ -65,13 +65,13 @@ export const compile = (
     const list: string[] = t[1];
 
     // Safely wrap ||
-    if (!wrapped) str += '(';
+    wrapped || (str += '(');
 
-    str += i + '===' + JSON.stringify(list[0]);
+    str += i + '==="' + list[0] + '"';
     for (let j = 1; j < list.length; j++)
-      str += '||' + i + '===' + JSON.stringify(list[j]);
+      str += '||' + i + '==="' + list[j] + '"';
 
-    if (!wrapped) str += ')';
+    wrapped || (str += ')');
   } else if (id === 12)
     // @ts-ignore Only stringify when necessary
     str += i + '===' + (typeof t[1] === 'string' ? JSON.stringify(t[1]) : t[1]);
