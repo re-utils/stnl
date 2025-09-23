@@ -270,3 +270,13 @@ const stringifyUser = build.json.stringify(schema);
 if (isUser(user))
   console.log(stringifyUser(user) === JSON.stringify(user)); // true
 ```
+
+### Usage with `runtime-compiler`
+Some `build` module supports `runtime-compiler`.
+```ts
+// runtime-compiler compatible modules ends with .rt
+import build from 'stnl/build/json/stringify.rt';
+
+// Build to a value string, eg $0(o)
+build(schema, 'o');
+```
