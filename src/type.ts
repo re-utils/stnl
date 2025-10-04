@@ -89,7 +89,7 @@ export type TTag<I extends string, T extends TypeDict> = IType<
 
 // References
 interface Ref<out T> {
-  ['']: T;
+  '': T;
 }
 export type SelfRef = Ref<''>;
 export type TSelf = TRef<''>;
@@ -156,12 +156,14 @@ export const union = <const T extends CUnion>(l: T): TUnion<T> =>
 export const value = <const T extends CConst>(t: T): TConst<T> =>
   [12, t] as any;
 
+const baselist: [number, ...any[]] = [14];
+
 /**
  * Create a list type
  */
 export const list = <const T extends IType>(
   ...args: [type: T, ...LLen[]]
-): TList<T> => [14, ...args] as any;
+): TList<T> => baselist.concat(args) as any;
 
 /**
  * Create a dict type

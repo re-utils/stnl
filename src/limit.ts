@@ -1,4 +1,5 @@
 import type { TFloat, TInt, TString } from './type.js';
+import { int as tint, float as tfloat, string as tstring } from './type.js';
 
 // Type constraints
 export interface Limit<I extends number = number> {
@@ -49,16 +50,16 @@ export type LNumber = LMin | LMax;
  * Create an integer type with limits
  * @param a
  */
-export const int = (...a: LNumber[]): TInt => [0, ...a] as any;
+export const int = (...a: LNumber[]): TInt => (tint as any).concat(a);
 
 /**
  * Create a float type with limits
  * @param a
  */
-export const float = (...a: LNumber[]): TFloat => [2, ...a] as any;
+export const float = (...a: LNumber[]): TFloat => (tfloat as any).concat(a);
 
 /**
  * Create a string type with limits
  * @param a
  */
-export const string = (...a: LLen[]): TString => [4, ...a] as any;
+export const string = (...a: LLen[]): TString => (tstring as any).concat(a);
