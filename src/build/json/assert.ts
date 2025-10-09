@@ -178,15 +178,6 @@ export const compile = (
   return wrapped ? str + ')' : str;
 };
 
-export const dependencies = (deps: string[]): string => {
-  let res = '';
-  if (deps.length > 0) {
-    for (let i = 0; i < deps.length; i++)
-      res += (i === 0 ? 'var d' : ',d') + (i + 1) + '=' + deps[i];
-  }
-  return res;
-};
-
 /**
  * Get the compiled assertion code of a schema
  * @param t
@@ -194,7 +185,13 @@ export const dependencies = (deps: string[]): string => {
 export const code = (t: TLoadedType): string => {
   const deps: string[] = [];
   const str = optimizeDirectCall(compileToFn(t, deps));
-  return dependencies(deps) + ';return ' + str;
+
+  let res = 'var _';
+  if (deps.length > 0)
+    for (let i = 0; i < deps.length; i++)
+      res += ',d' + (i + 1) + '=' + deps[i];
+
+  return res + ';return ' + str;
 };
 
 /**

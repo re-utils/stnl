@@ -20,7 +20,7 @@ const BOOL_LIST = isHydrating
  * Get the compiled stringifier of a schema
  * @param t
  */
-export default (isHydrating ? noOp : (t, input) => {
+export default (t: TLoadedType, input: string): string => {
   let id = t[0];
 
   if (id === 0 || id === 2) return '""+' + input;
@@ -52,4 +52,4 @@ export default (isHydrating ? noOp : (t, input) => {
   }
 
   return 'JSON.stringify(' + input + ')';
-}) as (t: TLoadedType, input: string) => string;
+};
