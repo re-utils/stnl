@@ -186,11 +186,10 @@ export const code = (t: TLoadedType): string => {
   const deps: string[] = [];
   const str = optimizeDirectCall(compileToFn(t, deps));
 
-  let res = 'var _';
-  if (deps.length > 0)
-    for (let i = 0; i < deps.length; i++)
-      res += ',d' + (i + 1) + '=' + deps[i];
+  if (deps.length === 0) return 'return ' + str;
 
+  let res = 'var _';
+  for (let i = 0; i < deps.length; i++) res += ',d' + (i + 1) + '=' + deps[i];
   return res + ';return ' + str;
 };
 
