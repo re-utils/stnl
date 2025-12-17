@@ -175,12 +175,12 @@ export const union = <
 export const ref = <const T extends string>(name: T): Schema<Ref<T>, T> => [11, name] as any;
 
 /**
- * Reference to the scope schema
+ * Reference to the parent scope schema
  */
 export const self: Schema<SelfRef, ''> = [11, ''] as any;
 
 /**
- * Resolve unknown references of a type
+ * Resolve unknown references of a schema
  * @param schema
  * @param map
  */
@@ -211,7 +211,7 @@ export const module = <const T extends Record<string, AnySchema>>(
 ): {
   [K in keyof T]: InferScopeSchema<T[K], T>;
 } => {
-  const scopedMod: Record<any, any> = {};
+  const scopedMod: Record<any, AnySchema> = {};
   for (const key in mod) scopedMod[key] = scope(ref(key), mod);
   return scopedMod as any;
 };
