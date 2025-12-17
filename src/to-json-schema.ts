@@ -8,8 +8,10 @@ export interface V7Schema {
 
   anyOf?: V7Schema[];
 
-  $defs?: Record<string, V7Schema>;
-  $id?: string;
+  $defs?: {
+    [key: string]: Omit<V7Schema, '$id'> & { $id: string }
+  };
+  $id?: '';
   $ref?: string;
 
   const?: unknown;
@@ -33,8 +35,6 @@ export interface V7Schema {
 
 export const _nullSchema = { const: null };
 export const _toConstSchema = <T>(primitive: T): { const: T } => ({ const: primitive });
-export const _wrapId = (obj: V7Schema, id: string): V7Schema =>
-  obj.$id == null || obj.$id === id ? obj : { $id: id, anyOf: [obj] };
 
 export const _loadLimits = (obj: V7Schema, schema: AnySchema, startIndex: number): V7Schema => {
   // @ts-ignore
@@ -156,10 +156,21 @@ export const v7 = (schema: AnySchema): V7Schema => {
 
     // @ts-ignore
     const map: Record<string, AnySchema> | undefined = schema[2];
-    for (const key in map) defs[key] = _wrapId(v7(map[key]), key);
+    for (const key in map) {
+      const schema = map[key];
+      // @ts-ignore also a root schema
+      if (schema[0] === 12)
+        defs[key] = { $id: key as any, anyOf: [v7(schema)] };
+      else {
+        const child = v7(schema);
+        child.$id = key as any;
+        defs[key] = child as any;
+      }
+    }
 
     // @ts-ignore
-    const root = _wrapId(v7(schema[1]), '');
+    const root = v7(schema[1]);
+    root.$id = '';
     root.$defs = defs;
 
     return root;
