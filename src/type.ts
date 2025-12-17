@@ -199,8 +199,8 @@ export const scope = <
 /**
  * Attach metadata to a schema
  */
-export const describe = <T extends AnySchema>(schema: T): Schema<T['~type'], T['~ref']> =>
-  [13, schema] as any;
+export const describe = <T extends AnySchema>(schema: T, meta: {}): Schema<T['~type'], T['~ref']> =>
+  [13, schema, meta] as any;
 
 /**
  * Create a schema module

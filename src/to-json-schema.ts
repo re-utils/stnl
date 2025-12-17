@@ -9,7 +9,7 @@ export interface V7Schema {
   anyOf?: V7Schema[];
 
   $defs?: {
-    [key: string]: Omit<V7Schema, '$id'> & { $id: string }
+    [key: string]: Omit<V7Schema, '$id'> & { $id: string };
   };
   $id?: '';
   $ref?: string;
@@ -31,6 +31,14 @@ export interface V7Schema {
   maxLength?: number;
 
   pattern?: string;
+
+  title?: string;
+  description?: string;
+  default?: unknown;
+  examples?: unknown[];
+  deprecated?: true;
+  readOnly?: true;
+  writeOnly?: true;
 }
 
 export const _nullSchema = { const: null };
@@ -159,8 +167,7 @@ export const v7 = (schema: AnySchema): V7Schema => {
     for (const key in map) {
       const schema = map[key];
       // @ts-ignore also a root schema
-      if (schema[0] === 12)
-        defs[key] = { $id: key as any, anyOf: [v7(schema)] };
+      if (schema[0] === 12) defs[key] = { $id: key as any, anyOf: [v7(schema)] };
       else {
         const child = v7(schema);
         child.$id = key as any;
@@ -174,9 +181,24 @@ export const v7 = (schema: AnySchema): V7Schema => {
     root.$defs = defs;
 
     return root;
-  } else if (id === 13)
+  } else if (id === 13) {
     // @ts-ignore
-    return v7(schema[1]);
+    const meta = schema[2];
+    // @ts-ignore
+    const root = v7(schema[1]);
+
+    // Try to port compatible properties
+    if (typeof meta === 'object') {
+      if (typeof meta.title === 'string') root.title = meta.title;
+      if (typeof meta.description === 'string') root.description = meta.description;
+      if (typeof meta.default !== 'undefined') root.default = meta.default;
+      if (meta.deprecated === true) root.deprecated = true;
+      if (meta.readOnly === true) root.readOnly = true;
+      if (meta.writeOnly === true) root.writeOnly = true;
+    }
+
+    return root;
+  }
 
   throw new Error('Unknown schema base type: ' + id);
 };
