@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    // Enable latest features
+    "lib": [
+      "ESNext.AsyncIterable",
+      "ESNext",
+      "DOM",
+      "DOM.Iterable",
+      "DOM.AsyncIterable",
+      "WebWorker.ImportScripts",
+      "Webworker.Iterable",
+      "WebWorker.AsyncIterable"
+    ],
+    "target": "ESNext",
+
+    // Module
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+
+    // Best practices
+    "strict": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitThis": true,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Declaration
+    "declaration": true,
+    "isolatedDeclarations": true,
+    "noEmit": true
+  }
+}

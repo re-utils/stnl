@@ -1,0 +1,32 @@
+{
+  "name": "stnl",
+  "version": "1.4.0",
+  "description": "A simple, opinionated schema library built for performance",
+  "keywords": [],
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/re-utils/stnl"
+  },
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "task": "bun scripts/task.ts",
+    "fmt": "oxfmt",
+    "test:type": "cd tests/types && tsc",
+    "build:test": "bun task build && bun i && bun test",
+    "bench:node": "node --import jiti/register --expose-gc --allow-natives-syntax",
+    "bench:deno": "deno run --allow-all --v8-flags=--expose-gc,--allow-natives-syntax"
+  },
+  "devDependencies": {
+    "@ark/attest": "^0.56.0",
+    "@standard-schema/spec": "^1.1.0",
+    "@types/bun": "^1.3.3",
+    "jiti": "^2.6.1",
+    "mitata": "^1.0.34",
+    "oxc-minify": "^0.64.0",
+    "oxc-transform": "^0.65.0",
+    "oxfmt": "^0.16.0",
+    "stnl": "./lib",
+    "typescript": "^5.9.3"
+  }
+}

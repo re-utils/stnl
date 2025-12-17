@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "isolatedModules": false,
+    "isolatedDeclarations": false,
+    "allowImportingTsExtensions": true,
+    "allowArbitraryExtensions": true,
+    "allowJs": true
+  }
+}
