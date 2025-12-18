@@ -30,10 +30,10 @@ export interface ExtendableSchema<out Type, out Refs extends string> extends Sch
   concat:
     | (<Limits extends [Limit<any>, Limit<any>, ...Limit<any>[]]>(
         ...limits: Limits
-      ) => Schema<Type & UnionToIntersection<Limits[number]['~type']>, Refs>)
+      ) => ExtendableSchema<Type & UnionToIntersection<Limits[number]['~type']>, Refs>)
     | (<Limits extends Limit<any>[]>(
         limits: Limits,
-      ) => Schema<Type & UnionToIntersection<Limits[number]['~type']>, Refs>);
+      ) => ExtendableSchema<Type & UnionToIntersection<Limits[number]['~type']>, Refs>);
 }
 export type AnySchema = Schema<any, any>;
 
