@@ -1,4 +1,4 @@
-import type { Evaluate, UnionToIntersection } from './types';
+import type { Evaluate } from './types';
 
 export interface Ref<out T extends string> {
   '~ref': T;
@@ -27,13 +27,9 @@ export interface Schema<out Type, out Refs extends string> extends Ref<Refs> {
   '~type': Type;
 }
 export interface ExtendableSchema<out Type, out Refs extends string> extends Schema<Type, Refs> {
-  concat:
-    | (<Limits extends [Limit<any>, Limit<any>, ...Limit<any>[]]>(
-        ...limits: Limits
-      ) => ExtendableSchema<Type & UnionToIntersection<Limits[number]['~type']>, Refs>)
-    | (<Limits extends Limit<any>[]>(
-        limits: Limits,
-      ) => ExtendableSchema<Type & UnionToIntersection<Limits[number]['~type']>, Refs>);
+  concat: <Limits extends Limit<Type>[]>(
+    limits: Limits,
+  ) => this;
 }
 export type AnySchema = Schema<any, any>;
 
@@ -110,8 +106,8 @@ export const list = <T extends AnySchema>(item: T): ExtendableSchema<T['~type'][
  * @param optional
  */
 export const dict = <
-  const Required extends Record<string, AnySchema>,
-  const Optional extends Record<string, AnySchema> | undefined = undefined,
+  Required extends Record<string, AnySchema>,
+  Optional extends Record<string, AnySchema> | undefined = undefined,
 >(
   required: Required,
   optional?: Optional,
@@ -156,7 +152,7 @@ export const tuple = <const T extends [AnySchema, AnySchema, ...AnySchema[]]>(
  */
 export const union = <
   const Discriminator extends string,
-  const Map extends Record<string, Schema<Record<string, AnySchema>, any>>,
+  Map extends Record<string, Schema<Record<string, AnySchema>, any>>,
 >(
   prop: Discriminator,
   map: Map,
@@ -185,8 +181,8 @@ export const self: Schema<SelfRef, ''> = [11, ''] as any;
  * @param map
  */
 export const scope = <
-  const T extends AnySchema,
-  const ResolveMap extends
+  T extends AnySchema,
+  ResolveMap extends
     | {
         [K in T['~ref']]?: AnySchema;
       }
@@ -219,35 +215,35 @@ export const module = <const T extends Record<string, AnySchema>>(
 /**
  * Define the length upper bound
  */
-export const maxLen = (len: number): Limit<{ length: number }> => [1, len] as any;
+export const maxLen = (len: number): Limit<string & any[]> => [1, len] as any;
 
 /**
  * Define the length lower bound
  */
-export const minLen = (len: number): Limit<{ length: number }> => [2, len] as any;
+export const minLen = (len: number): Limit<string & any[]> => [2, len] as any;
 
 /**
  * Define the string prefix
  */
-export const startsWith = <const T extends string>(str: T): Limit<`${T}${string}`> =>
+export const startsWith = <const T extends string>(str: T): Limit<string> =>
   [3, str] as any;
-
-/**
- * Define minimum value of a type
- */
-export const min = <T>(value: T): Limit<T> => [4, value] as any;
 
 /**
  * Define maximum value of a type
  */
-export const max = <T>(value: T): Limit<T> => [5, value] as any;
+export const max = <T>(value: T): Limit<T> => [4, value] as any;
 
 /**
- * Define exclusive minimum value of a type
+ * Define minimum value of a type
  */
-export const exclusiveMin = <T>(value: T): Limit<T> => [6, value] as any;
+export const min = <T>(value: T): Limit<T> => [5, value] as any;
 
 /**
  * Define exclusive maximum value of a type
  */
-export const exclusiveMax = <T>(value: T): Limit<T> => [7, value] as any;
+export const exclusiveMax = <T>(value: T): Limit<T> => [6, value] as any;
+
+/**
+ * Define exclusive minimum value of a type
+ */
+export const exclusiveMin = <T>(value: T): Limit<T> => [7, value] as any;

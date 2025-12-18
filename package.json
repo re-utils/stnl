@@ -12,7 +12,7 @@
   "scripts": {
     "task": "bun scripts/task.ts",
     "fmt": "oxfmt",
-    "test:type": "cd tests/types && tsc",
+    "test:type": "cd tests && tsc",
     "build:test": "bun task build && bun i && bun test",
     "bench:node": "node --import jiti/register --expose-gc --allow-natives-syntax",
     "bench:deno": "deno run --allow-all --v8-flags=--expose-gc,--allow-natives-syntax"
@@ -26,6 +26,7 @@
     "oxc-transform": "^0.65.0",
     "oxfmt": "^0.16.0",
     "stnl": "./lib",
+    "typebox": "^1.0.64",
     "typescript": "^5.9.3"
   }
 }
