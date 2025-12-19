@@ -33,9 +33,9 @@ export const _compileObject = (schema: AnySchema, input: string, deps: string[])
   // @ts-ignore
   const optional: Record<string, AnySchema> | undefined = schema[2];
   if (optional != null)
-    for (let key in optional) {
-      key = input + '.' + key;
-      str += '&&(typeof ' + key + '==="undefined"||' + _compile(optional[key], key, deps) + ')';
+    for (const key in optional) {
+      const keyInput = input + '.' + key;
+      str += '&&(typeof ' + keyInput + '==="undefined"||' + _compile(optional[key], keyInput, deps) + ')';
     }
   return str;
 };
