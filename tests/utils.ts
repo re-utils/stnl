@@ -3,10 +3,6 @@ import * as stnl from 'stnl';
 import type { AnySchema } from 'stnl/type';
 
 export namespace types {
-  export interface Exact<in out T> {
-    '~': T;
-  }
-
   export type Extends<A, B> = A extends B
     ? true
     : false & {
