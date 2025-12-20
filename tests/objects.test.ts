@@ -68,5 +68,41 @@ describe('simple objects', () => {
         }
       >
     >;
+
+    tests.toJSONAssert(schema, {
+      truthy: {
+        'exact match': {
+          name: 'reve',
+          id: 0,
+          displayName: 'reve'
+        },
+        'missing displayName': {
+          name: 'reve',
+          id: 0,
+        }
+      },
+      falsy: {
+        'missing name': {
+          id: 1,
+          displayName: 'reve',
+        },
+        'missing id': {
+          name: 'reve',
+          displayName: 'reve'
+        },
+        'missing all': {},
+        'wrong name': {
+          name: 're',
+          id: 2,
+          displayName: 'reve'
+        },
+        'wrong id': {
+          name: 'reve',
+          id: -1,
+          displayName: 'reve'
+        },
+        'wrong type': 'string',
+      },
+    });
   });
 });
