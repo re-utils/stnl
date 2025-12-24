@@ -1,5 +1,8 @@
 import type { AnySchema, Limit, Schema } from './type.ts';
 
+// Inject dependency callback
+let injectDep: (str: string) => string;
+
 export const _compileLimits = (schema: AnySchema, input: string, startIndex: number): string => {
   let str = '';
 
@@ -24,26 +27,26 @@ export const _compileLimits = (schema: AnySchema, input: string, startIndex: num
   return str;
 };
 
-export const _compileObject = (schema: AnySchema, input: string, deps: string[]): string => {
+export const _compileObject = (schema: AnySchema, input: string): string => {
   let str = '';
   // @ts-ignore
   const required: Record<string, AnySchema> = schema[1];
-  for (const key in required) str += '&&' + _compile(required[key], input + '.' + key, deps);
+  for (const key in required) str += '&&' + _compile(required[key], input + '.' + key);
 
   // @ts-ignore
   const optional: Record<string, AnySchema> | undefined = schema[2];
   if (optional != null)
     for (const key in optional) {
       const keyInput = input + '.' + key;
-      str += '&&(typeof ' + keyInput + '==="undefined"||' + _compile(optional[key], keyInput, deps) + ')';
+      str += '&&(typeof ' + keyInput + '==="undefined"||' + _compile(optional[key], keyInput) + ')';
     }
   return str;
 };
 
-export const _compileToFn = (schema: AnySchema, deps: string[]): string =>
-  'o=>' + _compile(schema, 'o', deps);
+export const _compileToFn = (schema: AnySchema): string =>
+  'o=>' + _compile(schema, 'o');
 
-export const _compile = (schema: AnySchema, input: string, deps: string[]): string => {
+export const _compile = (schema: AnySchema, input: string): string => {
   // @ts-ignore
   const id: number = schema[0];
   if (id === 0) return 'typeof ' + input + '!=="undefined"' + _compileLimits(schema, input, 1);
@@ -74,12 +77,11 @@ export const _compile = (schema: AnySchema, input: string, deps: string[]): stri
       input +
       ')&&' +
       input +
-      '.every(d' +
-      deps.push(
+      '.every(' +
+      injectDep!(
         _compileToFn(
           // @ts-ignore
-          schema[1],
-          deps,
+          schema[1]
         ),
       ) +
       ')' +
@@ -87,7 +89,7 @@ export const _compile = (schema: AnySchema, input: string, deps: string[]): stri
     );
   else if (id === 8)
     return (
-      'typeof ' + input + '==="object"&&' + input + '!==null' + _compileObject(schema, input, deps)
+      'typeof ' + input + '==="object"&&' + input + '!==null' + _compileObject(schema, input)
     );
   else if (id === 9) {
     // @ts-ignore
@@ -95,7 +97,7 @@ export const _compile = (schema: AnySchema, input: string, deps: string[]): stri
 
     let str = 'Array.isArray(' + input + ')&&' + input + '.length===' + items.length;
     for (let i = 0; i < items.length; i++)
-      str += '&&' + _compile(schema, input + '[' + i + ']', deps);
+      str += '&&' + _compile(schema, input + '[' + i + ']');
     return str;
   } else if (id === 10) {
     // @ts-ignore
@@ -105,7 +107,7 @@ export const _compile = (schema: AnySchema, input: string, deps: string[]): stri
 
     let str = 'typeof ' + input + '==="object"&&' + input + '!==null&&(';
     for (const key in map)
-      str += prop + JSON.stringify(key) + '?true' + _compileObject(map[key], input, deps) + ':';
+      str += prop + JSON.stringify(key) + '?true' + _compileObject(map[key], input) + ':';
     return str + 'false)';
   } else if (id === 11)
     return (
@@ -117,29 +119,24 @@ export const _compile = (schema: AnySchema, input: string, deps: string[]): stri
       ')'
     );
   else if (id === 12) {
-    const scopeDeps: string[] = [];
     let scope =
       '(()=>{var d=' +
       _compileToFn(
         // @ts-ignore
-        schema[1],
-        scopeDeps,
+        schema[1]
       );
 
     // @ts-ignore
     const map: Record<string, AnySchema> | undefined = schema[2];
     if (map != null)
-      for (const key in map) scope += ',d' + key + '=' + _compileToFn(map[key], scopeDeps);
+      for (const key in map) scope += ',d' + key + '=' + _compileToFn(map[key]);
 
-    for (let i = 0; i < scopeDeps.length; i++) scope += ',d' + (i + 1) + '=' + scopeDeps[i];
-
-    return 'd' + deps.push(scope + ';return d})()') + '(' + input + ')';
+    return injectDep!(scope + ';return d})()') + '(' + input + ')';
   } else if (id === 13)
     return _compile(
       // @ts-ignore
       schema[1],
       input,
-      deps,
     );
 
   throw new Error('Unknown schema base type: ' + id);
@@ -149,20 +146,22 @@ export const _compile = (schema: AnySchema, input: string, deps: string[]): stri
  * Get the compiled JSON assertion code of a schema
  * @param schema
  */
-export const code = (schema: AnySchema): string => {
-  const deps: string[] = [];
-  const str = _compileToFn(schema, deps);
+export const code = (schema: AnySchema, input: string, injectDependency: typeof injectDep): string => (
+  injectDep = injectDependency,
+  _compile(schema, input)
+);
 
-  if (deps.length === 0) return 'return ' + str;
-
-  let res = 'var d1=' + deps[0];
-  for (let i = 1; i < deps.length; i++) res += ',d' + (i + 1) + '=' + deps[i];
-  return res + ';return ' + str;
-};
+export let _globalVars: string = 'var l', varCnt = 0;
+export const _defaultInjectDep: typeof injectDep = (str) => (
+  _globalVars += ',l' + varCnt + '=' + str,
+  'l' + varCnt++
+);
 
 /**
  * Get the compiled JSON assertion function of a schema
  * @param schema
  */
-export const compile = <T extends AnySchema>(schema: T): ((o: any) => o is T['~type']) =>
-  Function(code(schema))();
+export const compile = <T extends AnySchema>(schema: T): ((o: any) => o is T['~type']) => {
+  const result = code(schema, 'o', _defaultInjectDep);
+  return Function(_globalVars + ';return o=>' + result)();
+}
