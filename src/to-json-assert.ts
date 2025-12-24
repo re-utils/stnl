@@ -151,8 +151,8 @@ export const code = (schema: AnySchema, input: string, injectDependency: typeof 
   _compile(schema, input)
 );
 
-export let _globalVars: string = 'var l', varCnt = 0;
-export const _defaultInjectDep: typeof injectDep = (str) => (
+let _globalVars: string = 'var l', varCnt = 0;
+const _defaultInjectDep: typeof injectDep = (str) => (
   _globalVars += ',l' + varCnt + '=' + str,
   'l' + varCnt++
 );
@@ -162,6 +162,11 @@ export const _defaultInjectDep: typeof injectDep = (str) => (
  * @param schema
  */
 export const compile = <T extends AnySchema>(schema: T): ((o: any) => o is T['~type']) => {
-  const result = code(schema, 'o', _defaultInjectDep);
-  return Function(_globalVars + ';return o=>' + result)();
+  let result = code(schema, 'o', _defaultInjectDep);
+  result = _globalVars + ';return o=>' + result;
+
+  _globalVars = 'var l';
+  varCnt = 0;
+
+  return Function(result)();
 }
