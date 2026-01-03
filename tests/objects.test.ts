@@ -64,7 +64,7 @@ describe('simple objects', () => {
         {
           name: string;
           id: number;
-          displayName?: string
+          displayName?: string;
         }
       >
     >;
@@ -74,12 +74,12 @@ describe('simple objects', () => {
         'exact match': {
           name: 'reve',
           id: 0,
-          displayName: 'reve'
+          displayName: 'reve',
         },
         'missing displayName': {
           name: 'reve',
           id: 0,
-        }
+        },
       },
       falsy: {
         'missing name': {
@@ -88,18 +88,18 @@ describe('simple objects', () => {
         },
         'missing id': {
           name: 'reve',
-          displayName: 'reve'
+          displayName: 'reve',
         },
         'missing all': {},
         'wrong name': {
           name: 're',
           id: 2,
-          displayName: 'reve'
+          displayName: 'reve',
         },
         'wrong id': {
           name: 'reve',
           id: -1,
-          displayName: 'reve'
+          displayName: 'reve',
         },
         'wrong type': 'string',
       },

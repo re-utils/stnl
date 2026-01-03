@@ -27,9 +27,7 @@ export interface Schema<out Type, out Refs extends string> extends Ref<Refs> {
   '~type': Type;
 }
 export interface ExtendableSchema<out Type, out Refs extends string> extends Schema<Type, Refs> {
-  concat: <Limits extends Limit<Type>[]>(
-    limits: Limits,
-  ) => this;
+  concat: <Limits extends Limit<Type>[]>(limits: Limits) => this;
 }
 export type AnySchema = Schema<any, any>;
 
@@ -127,7 +125,7 @@ export const dict = <
         [K in keyof Required]: Required[K]['~type'];
       }>,
       Required[keyof Required]['~ref']
-    > => [8, required, optional] as any;
+    > => (optional == null ? ([8, required] as any) : ([8, required, optional] as any));
 
 /**
  * Create a tuple schema
@@ -190,7 +188,8 @@ export const scope = <
 >(
   schema: T,
   map?: ResolveMap,
-): InferScopeSchema<T, ResolveMap> => [12, schema, map] as any;
+): InferScopeSchema<T, ResolveMap> =>
+  map == null ? ([12, schema] as any) : ([12, schema, map] as any);
 
 /**
  * Attach metadata to a schema
@@ -225,8 +224,7 @@ export const minLen = (len: number): Limit<string & any[]> => [2, len] as any;
 /**
  * Define the string prefix
  */
-export const startsWith = <const T extends string>(str: T): Limit<string> =>
-  [3, str] as any;
+export const startsWith = <const T extends string>(str: T): Limit<string> => [3, str] as any;
 
 /**
  * Define maximum value of a type
