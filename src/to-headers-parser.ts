@@ -1,18 +1,30 @@
 import { addExtraCode, evaluate, type LocalValue } from 'runtime-compiler';
 
-import type { AnySchema, Schema } from './type.ts';
+import type { AnySchema, Schema } from './builder.ts';
 
-import { getObjectProperty } from './utils.ts';
-import { _compileLimits } from './to-json-assert.ts';
+import { _compileLimits } from './to-json-check.ts';
+import { assertHeader } from './utils.ts';
 
 export type HeadersSchema = Schema<Dict<boolean | string>, any>;
-export type HeadersParser<T extends HeadersSchema> = (headers: Headers) => {
-  [K in keyof T['~type']]-?: undefined extends T['~type'][K] ? null | (T['~type'][K] & {}) : T['~type'][K]
-} | null;
 
-export const code = <T extends HeadersSchema>(
-  schema: T,
-): LocalValue<HeadersParser<T>> => {
+type OptimizeProperty<T extends string> = T extends `${infer Start}-${infer End}`
+  ? `${Start}_${OptimizeProperty<End>}`
+  : T;
+export interface HeadersParser<in out T extends HeadersSchema> {
+  '~type': {
+    [K in Extract<
+      keyof T['~type'],
+      string
+    > as OptimizeProperty<K>]-?: undefined extends T['~type'][K]
+      ? null | (T['~type'][K] & {})
+      : T['~type'][K];
+  };
+  (headers: Headers): this['~type'] | null;
+}
+
+export const UNKNOWN_CHARACTER: RegExp = /[^A-Za-z0-9-]/;
+
+export const code = <T extends HeadersSchema>(schema: T): LocalValue<HeadersParser<T>> => {
   // @ts-ignore
   if (schema[0] !== 8) throw new Error('Only object schema is supported');
 
@@ -23,23 +35,23 @@ export const code = <T extends HeadersSchema>(
   // @ts-ignore
   const required: Record<string, AnySchema> = schema[1];
   for (const key in required) {
+    assertHeader(key);
     const propSchema = required[key];
 
     let input = 'l' + nextId++;
-    props += getObjectProperty(key) + ':' + input + ',';
+    props += key.replace(/-/g, '_') + ':' + input + ',';
 
     // @ts-ignore
     const id = propSchema[0];
 
     str += ',' + input;
     if (id === 3) {
-      str += '=o.has(' + JSON.stringify(key) + ')';
+      str += '=o.has("' + key + '")';
     } else {
-      str += '=o.get(' + JSON.stringify(key) + ')';
+      str += '=o.has("' + key + '")';
 
       if (id === 4) {
-        condition +=
-          '&&' + input + '!==null' + _compileLimits(propSchema, input, 1);
+        condition += '&&' + input + '!==null' + _compileLimits(propSchema, input, 1);
       } else if (id === 6) {
         // @ts-ignore
         const list: string[] = propSchema[1];
@@ -62,19 +74,20 @@ export const code = <T extends HeadersSchema>(
     // @ts-ignore
     const optional: Record<string, AnySchema> | undefined = schema[2];
     for (const key in optional) {
+      assertHeader(key);
       const propSchema = optional[key];
 
       let input = 'l' + nextId++;
-      props += getObjectProperty(key) + ':' + input + ',';
+      props += key.replace(/-/g, '_') + ':' + input + ',';
 
       // @ts-ignore
       const id = propSchema[0];
 
       str += ',' + input;
       if (id === 3) {
-        str += '=o.has(' + JSON.stringify(key) + ')';
+        str += '=o.has("' + key + '")';
       } else {
-        str += '=o.get(' + JSON.stringify(key) + ')';
+        str += '=o.has("' + key + '")';
 
         if (id === 6) {
           condition += '&&(' + input + '===null';
@@ -91,7 +104,8 @@ export const code = <T extends HeadersSchema>(
             condition += input + JSON.stringify(list[i]);
 
           condition += ')';
-        } else if (id !== 4) throw new Error('Unsupported schema type for required properties: ' + id);
+        } else if (id !== 4)
+          throw new Error('Unsupported schema type for required properties: ' + id);
       }
     }
   }
@@ -99,8 +113,9 @@ export const code = <T extends HeadersSchema>(
   return (str + ';return ' + condition + '?{' + props + '}:null}') as any;
 };
 
-export const compile = <T extends HeadersSchema>(
-  schema: T,
-): HeadersParser<T> => (
+/**
+ * Compile a `Headers` parser from a schema
+ */
+export const compile = <T extends HeadersSchema>(schema: T): HeadersParser<T> => (
   addExtraCode('return ' + code(schema)), evaluate()
 );

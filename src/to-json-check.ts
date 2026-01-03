@@ -1,6 +1,6 @@
-import type { AnySchema, Limit, Schema } from './type.ts';
+import type { AnySchema, Limit, Schema } from './builder.ts';
 import { addExtraCode, evaluate, injectDependency, type LocalValue } from 'runtime-compiler';
-import { getAccessor } from './utils.ts';
+import { assertProperty } from './utils.ts';
 
 export const _compileLimits = (schema: AnySchema, input: string, startIndex: number): string => {
   let str = '';
@@ -30,14 +30,18 @@ export const _compileObject = (schema: AnySchema, input: string): string => {
   let str = '';
   // @ts-ignore
   const required: Record<string, AnySchema> = schema[1];
-  for (const key in required) str += '&&' + code(required[key], input + getAccessor(key));
+  for (const key in required) {
+    assertProperty(key);
+    str += '&&' + code(required[key], input + '.' + key);
+  }
 
   // @ts-ignore
   if (schema.length > 2) {
     // @ts-ignore
     const optional: Record<string, AnySchema> | undefined = schema[2];
     for (const key in optional) {
-      const keyInput = input + getAccessor(key);
+      assertProperty(key);
+      const keyInput = input + '.' + key;
       str += '&&(typeof ' + keyInput + '==="undefined"||' + code(optional[key], keyInput) + ')';
     }
   }
@@ -135,18 +139,13 @@ export const code = (schema: AnySchema, input: string): LocalValue<boolean> => {
     }
 
     return (injectDependency(scope + ';return d})()') + '(' + input + ')') as any;
-  } else if (id === 13)
-    return code(
-      // @ts-ignore
-      schema[1],
-      input,
-    );
+  }
 
   throw new Error('Unknown schema base type: ' + id);
 };
 
 /**
- * Get the compiled JSON assertion function of a schema
+ * Compile a JSON check function from a schema
  * @param schema
  */
 export const compile = <T extends AnySchema>(schema: T): ((o: any) => o is T['~type']) => (

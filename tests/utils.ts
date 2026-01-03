@@ -1,8 +1,13 @@
 import { expect, describe, test } from 'bun:test';
 import * as stnl from 'stnl';
-import type { AnySchema } from 'stnl/type';
 
 export namespace types {
+  export type Evaluate<T> = {
+    [K in keyof T]: T[K];
+  } & {};
+
+  export type ReturnGuard<T> = T extends ((o: any) => o is infer R) ? R : null;
+
   export type Extends<A, B> = A extends B
     ? true
     : false & {
@@ -24,16 +29,14 @@ export namespace types {
 }
 
 export namespace tests {
-  export const toJSONAssert = (
-    schema: AnySchema,
+  export const toJSONCheck = <Truthy>(
+    fn: (o: any) => o is Truthy,
     tests: {
-      truthy: Record<string, any>;
+      truthy: Record<string, Truthy>;
       falsy: Record<string, any>;
     },
   ): void => {
-    describe('toJSONAssert', () => {
-      const fn = stnl.toJSONAssert.compile(schema);
-
+    describe('toJSONCheck', () => {
       for (const key in tests.truthy) {
         const value = tests.truthy[key];
         test(key + ' (expect true)', () => {
@@ -45,6 +48,56 @@ export namespace tests {
         const value = tests.falsy[key];
         test(key + ' (expect false)', () => {
           expect(fn(value)).toBeFalse();
+        });
+      }
+    });
+  };
+
+  // Reverse the property parsing
+  type OptionalIfUndefined<T> = {
+    [K in keyof T as undefined extends T[K] ? K : never]?: T[K];
+  } & {
+    [K in keyof T as undefined extends T[K] ? never : K]: T[K];
+  };
+  type DeoptimizeProperty<T extends string> = T extends `${infer Start}_${infer End}`
+    ? `${Start}-${DeoptimizeProperty<End>}`
+    : T;
+  type ValidHeaders<T extends stnl.toHeadersParser.HeadersSchema['~type']> = OptionalIfUndefined<{
+    [K in Extract<keyof T, string> as DeoptimizeProperty<K>]: null extends T[K]
+      ? undefined | string
+      : string;
+  }>;
+
+  export const toHeadersParser = <Fn extends stnl.toHeadersParser.HeadersParser<any>>(
+    fn: Fn,
+    tests: {
+      truthy: Record<string, ValidHeaders<ReturnType<Fn> & {}>>;
+      falsy: Record<string, Record<string, string>>;
+    },
+  ): void => {
+    describe('toHeadersParser', () => {
+      for (const key in tests.truthy) {
+        const value = tests.truthy[key];
+        test(key + ' (expect not null)', () => {
+          const parsed = fn(new Headers(value as {}))!;
+
+          for (const key in parsed) {
+            const originalKey = key.replace(/_/g, '-');
+            if (parsed[key] === null) expect(value).not.toHaveProperty(originalKey);
+            if (typeof parsed[key] === 'boolean')
+              // @ts-ignore
+              expect(value[originalKey] != null).toEqual(parsed[key]);
+            else
+              // @ts-ignore
+              expect(value[originalKey]).toEqual(parsed[key]);
+          }
+        });
+      }
+
+      for (const key in tests.falsy) {
+        const value = tests.falsy[key];
+        test(key + ' (expect null)', () => {
+          expect(fn(new Headers(value))).toBeNull();
         });
       }
     });

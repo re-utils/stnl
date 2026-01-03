@@ -1,4 +1,4 @@
-import type { AnySchema } from './type.ts';
+import type { AnySchema } from './builder.ts';
 
 /**
  * Define possible output keywords of an stnl schema
@@ -179,23 +179,6 @@ export const v7 = (schema: AnySchema): V7Schema => {
     const root = v7(schema[1]);
     root.$id = '';
     root.$defs = defs;
-
-    return root;
-  } else if (id === 13) {
-    // @ts-ignore
-    const meta = schema[2];
-    // @ts-ignore
-    const root = v7(schema[1]);
-
-    // Try to port compatible properties
-    if (typeof meta === 'object') {
-      if (typeof meta.title === 'string') root.title = meta.title;
-      if (typeof meta.description === 'string') root.description = meta.description;
-      if (typeof meta.default !== 'undefined') root.default = meta.default;
-      if (meta.deprecated === true) root.deprecated = true;
-      if (meta.readOnly === true) root.readOnly = true;
-      if (meta.writeOnly === true) root.writeOnly = true;
-    }
 
     return root;
   }

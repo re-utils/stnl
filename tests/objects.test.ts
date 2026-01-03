@@ -1,17 +1,20 @@
 import { tests, types } from './utils.ts';
-import { t } from 'stnl';
+import { t, toJSONCheck } from 'stnl';
 import { describe } from 'bun:test';
 
 describe('simple objects', () => {
   describe('no optional properties', () => {
-    const schema = t.dict({
+    const T = t.dict({
       name: t.string.concat([t.minLen(3)]),
       id: t.int.concat([t.min(0)]),
     });
+    type T = (typeof T)['~type'];
+    const tJSONCheck = toJSONCheck.compile(T);
 
+    types.ExpectTrue<types.Equal<T, types.ReturnGuard<typeof tJSONCheck>>>;
     types.ExpectTrue<
       types.Equal<
-        (typeof schema)['~type'],
+        T,
         {
           name: string;
           id: number;
@@ -19,7 +22,7 @@ describe('simple objects', () => {
       >
     >;
 
-    tests.toJSONAssert(schema, {
+    tests.toJSONCheck(tJSONCheck, {
       truthy: {
         'exact match': {
           name: 'reve',
@@ -48,7 +51,7 @@ describe('simple objects', () => {
   });
 
   describe('with optional properties', () => {
-    const schema = t.dict(
+    const T = t.dict(
       {
         name: t.string.concat([t.minLen(3)]),
         id: t.int.concat([t.min(0)]),
@@ -57,10 +60,13 @@ describe('simple objects', () => {
         displayName: t.string,
       },
     );
+    type T = (typeof T)['~type'];
+    const tJSONCheck = toJSONCheck.compile(T);
 
+    types.ExpectTrue<types.Equal<T, types.ReturnGuard<typeof tJSONCheck>>>;
     types.ExpectTrue<
       types.Equal<
-        (typeof schema)['~type'],
+        T,
         {
           name: string;
           id: number;
@@ -69,7 +75,7 @@ describe('simple objects', () => {
       >
     >;
 
-    tests.toJSONAssert(schema, {
+    tests.toJSONCheck(tJSONCheck, {
       truthy: {
         'exact match': {
           name: 'reve',

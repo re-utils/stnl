@@ -1,30 +1,11 @@
-const UNKNOWN_CHARACTER = /[^A-Za-z0-9_-]/;
-
+export const PROPERTY_REGEX: RegExp = /^[A-Za-z][A-Za-z0-9_]*$/;
 export const assertProperty = (name: string): void => {
-  if (UNKNOWN_CHARACTER.test(name))
-    throw new Error('property `' + name + '` must only includes A-Z, a-z, 0-9, _ and -');
+  if (!PROPERTY_REGEX.test(name))
+    throw new Error('property `' + name + '` must only includes letters, digits and _');
 };
 
-/**
- * Get property accessor.
- *
- * @example
- * getAccessor('name'); // '.name'
- * getAccessor('content-type'); // '["content-type"]'
- * getAccessor('&name'); // throws
- */
-export const getAccessor = (name: string): string => (
-  assertProperty(name), name.includes('-') ? '[' + JSON.stringify(name) + ']' : '.' + name
-);
-
-/**
- * Get property to set in object
- *
- * @example
- * getObjectProperty('name'); // 'name'
- * getObjectProperty('content-type'); // '"content-type"'
- * getObjectProperty('&name'); // throws
- */
-export const getObjectProperty = (name: string): string => (
-  assertProperty(name), name.includes('-') ? JSON.stringify(name) : name
-);
+export const HEADER_REGEX: RegExp = /^[A-Za-z][A-Za-z0-9-]*[A-Za-z0-9]$/;
+export const assertHeader = (name: string): void => {
+  if (!HEADER_REGEX.test(name))
+    throw new Error('header `' + name + '` must only includes letters, digits and hyphen (`-`)');
+};

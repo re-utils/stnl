@@ -1,5 +1,5 @@
 import { v7 } from './to-json-schema.ts';
-import type { AnySchema } from './type.ts';
+import type { AnySchema } from './builder.ts';
 import type { StandardJSONSchemaV1 } from '@standard-schema/spec';
 
 const input = () => {
