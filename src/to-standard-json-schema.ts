@@ -11,7 +11,6 @@ function outputV1(
   options: StandardJSONSchemaV1.Options,
 ) {
   if (options.target === 'draft-07') return v7(this._) as Record<string, unknown>;
-
   throw new Error('Unsupported JSON schema target: ' + options.target);
 }
 

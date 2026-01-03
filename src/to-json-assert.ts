@@ -1,5 +1,5 @@
 import type { AnySchema, Limit, Schema } from './type.ts';
-import { addExtraCode, evaluate, injectDependency } from 'runtime-compiler';
+import { addExtraCode, evaluate, injectDependency, type LocalValue } from 'runtime-compiler';
 import { getAccessor } from './utils.ts';
 
 export const _compileLimits = (schema: AnySchema, input: string, startIndex: number): string => {
@@ -44,21 +44,23 @@ export const _compileObject = (schema: AnySchema, input: string): string => {
   return str;
 };
 
-export const code = (schema: AnySchema, input: string): string => {
+export const code = (schema: AnySchema, input: string): LocalValue<boolean> => {
   // @ts-ignore
   const id: number = schema[0];
-  if (id === 0) return 'typeof ' + input + '!=="undefined"' + _compileLimits(schema, input, 1);
-  else if (id === 1) return 'Number.isFinite(' + input + ')' + _compileLimits(schema, input, 1);
-  else if (id === 2) return 'Number.isInteger(' + input + ')' + _compileLimits(schema, input, 1);
-  else if (id === 3) return 'typeof ' + input + '==="boolean"';
-  else if (id === 4) return 'typeof ' + input + '==="string"' + _compileLimits(schema, input, 1);
+  if (id === 0)
+    return ('typeof ' + input + '!=="undefined"' + _compileLimits(schema, input, 1)) as any;
+  else if (id === 1)
+    return ('Number.isFinite(' + input + ')' + _compileLimits(schema, input, 1)) as any;
+  else if (id === 2)
+    return ('Number.isInteger(' + input + ')' + _compileLimits(schema, input, 1)) as any;
+  else if (id === 3) return ('typeof ' + input + '==="boolean"') as any;
+  else if (id === 4)
+    return ('typeof ' + input + '==="string"' + _compileLimits(schema, input, 1)) as any;
   else if (id === 5)
-    return (
-      input +
+    return (input +
       '===null&&' +
       // @ts-ignore
-      _compile(schema[1], input, scopeDeps)
-    );
+      _compile(schema[1], input, scopeDeps)) as any;
   else if (id === 6) {
     // @ts-ignore
     const list: string[] = schema[1];
@@ -68,10 +70,9 @@ export const code = (schema: AnySchema, input: string): string => {
 
     input = '&&' + input;
     for (let i = 1; i < list.length; i++) str += input + JSON.stringify(list[i]);
-    return str;
+    return str as any;
   } else if (id === 7)
-    return (
-      'Array.isArray(' +
+    return ('Array.isArray(' +
       input +
       ')&&' +
       input +
@@ -85,17 +86,21 @@ export const code = (schema: AnySchema, input: string): string => {
           ),
       ) +
       ')' +
-      _compileLimits(schema, input, 2)
-    );
+      _compileLimits(schema, input, 2)) as any;
   else if (id === 8)
-    return 'typeof ' + input + '==="object"&&' + input + '!==null' + _compileObject(schema, input);
+    return ('typeof ' +
+      input +
+      '==="object"&&' +
+      input +
+      '!==null' +
+      _compileObject(schema, input)) as any;
   else if (id === 9) {
     // @ts-ignore
     const items: AnySchema[] = schema[1];
 
     let str = 'Array.isArray(' + input + ')&&' + input + '.length===' + items.length;
     for (let i = 0; i < items.length; i++) str += '&&' + code(schema, input + '[' + i + ']');
-    return str;
+    return str as any;
   } else if (id === 10) {
     // @ts-ignore
     const prop: string = input + getAccessor(schema[1]) + '===';
@@ -105,16 +110,14 @@ export const code = (schema: AnySchema, input: string): string => {
     let str = 'typeof ' + input + '==="object"&&' + input + '!==null&&(';
     for (const key in map)
       str += prop + JSON.stringify(key) + '?true' + _compileObject(map[key], input) + ':';
-    return str + 'false)';
+    return (str + 'false)') as any;
   } else if (id === 11)
-    return (
-      'd' +
+    return ('d' +
       // @ts-ignore
       schema[1] +
       '(' +
       input +
-      ')'
-    );
+      ')') as any;
   else if (id === 12) {
     let scope =
       '(()=>{var d=o=>' +
@@ -131,7 +134,7 @@ export const code = (schema: AnySchema, input: string): string => {
       for (const key in map) scope += ',d' + key + '=o=>' + code(map[key], 'o');
     }
 
-    return injectDependency(scope + ';return d})()') + '(' + input + ')';
+    return (injectDependency(scope + ';return d})()') + '(' + input + ')') as any;
   } else if (id === 13)
     return code(
       // @ts-ignore
