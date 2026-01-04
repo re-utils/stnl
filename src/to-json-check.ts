@@ -1,5 +1,5 @@
 import type { AnySchema, Limit, Schema } from './builder.ts';
-import { addExtraCode, evaluate, injectDependency, type LocalValue } from 'runtime-compiler';
+import { addExtraCode, evaluate, injectDependency, type Expression } from 'runtime-compiler';
 
 export const _compileLimits = (schema: AnySchema, input: string, startIndex: number): string => {
   let str = '';
@@ -43,7 +43,7 @@ export const _compileObject = (schema: AnySchema, input: string): string => {
   return str;
 };
 
-export const code = (schema: AnySchema, input: string): LocalValue<boolean> => {
+export const code = (schema: AnySchema, input: string): Expression<boolean> => {
   // @ts-ignore
   const id: number = schema[0];
   if (id === 0)

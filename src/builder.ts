@@ -27,6 +27,7 @@ export interface Schema<out Type, out Refs extends string> extends Ref<Refs> {
   '~type': Type;
   concat: <Limits extends Limit<Type>[]>(limits: Limits) => this;
 }
+export type AnyResolvedSchema = Schema<any, never>;
 export type AnySchema = Schema<any, any>;
 
 export type InferScopeSchema<
@@ -132,11 +133,9 @@ export const dict = <
 export const tuple = <const T extends [AnySchema, AnySchema, ...AnySchema[]]>(
   items: T,
 ): Schema<
-  [
-    ...{
-      [K in keyof T]: T[K]['~type'];
-    },
-  ],
+  {
+    [K in keyof T]: T[K]['~type'];
+  },
   T[number]['~ref']
 > => [9, items] as any;
 
@@ -148,14 +147,14 @@ export const tuple = <const T extends [AnySchema, AnySchema, ...AnySchema[]]>(
  */
 export const union = <
   const Discriminator extends string,
-  Map extends Record<string, Schema<Record<string, AnySchema>, any>>,
+  Map extends Record<string, Schema<Record<string, any>, any>>,
 >(
   prop: Discriminator,
   map: Map,
 ): Schema<
   Evaluate<
     {
-      [K in keyof Map]: Map[K]['~type'] & Record<Discriminator, K>;
+      [K in keyof Map]: Record<Discriminator, K> & Map[K]['~type'];
     }[keyof Map]
   >,
   Map[keyof Map]['~ref']
