@@ -1,16 +1,27 @@
-import { v7 } from './to-json-schema.ts';
+import { openapi3, v2020_12, v7 } from './to-json-schema.ts';
 import type { AnySchema } from './builder.ts';
 import type { StandardJSONSchemaV1 } from '@standard-schema/spec';
 
-const input = () => {
+const output = () => {
   throw new Error('Conversion is not supported!');
 };
 
-function outputV1(
+function inputV1(
   this: { _: AnySchema } & StandardJSONSchemaV1.Converter,
   options: StandardJSONSchemaV1.Options,
 ) {
-  if (options.target === 'draft-07') return v7(this._) as Record<string, unknown>;
+  const target = options.target;
+
+  if (target === 'draft-07') {
+    const schema = v7(this._);
+    schema.$schema = 'http://json-schema.org/draft-07/schema';
+    return schema;
+  } else if (target === 'draft-2020-12') {
+    const schema = v2020_12(this._);
+    schema.$schema = 'https://json-schema.org/draft/2020-12/schema';
+    return schema;
+  } else if (target === 'openapi-3.0') return openapi3(this._);
+
   throw new Error('Unsupported JSON schema target: ' + options.target);
 }
 
@@ -24,8 +35,8 @@ export const v1 = <T extends AnySchema>(schema: T): StandardJSONSchemaV1<any, T[
     jsonSchema: {
       // @ts-ignore
       _: schema,
-      input,
-      output: outputV1,
+      input: inputV1,
+      output,
     },
   },
 });

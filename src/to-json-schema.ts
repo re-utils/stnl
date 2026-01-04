@@ -1,50 +1,13 @@
 import type { AnySchema } from './builder.ts';
 
-/**
- * Define possible output keywords of an stnl schema
- */
-export interface V7Schema {
-  type?: 'string' | 'number' | 'integer' | 'array' | 'object' | 'boolean';
-
-  anyOf?: V7Schema[];
-
-  $defs?: {
-    [key: string]: Omit<V7Schema, '$id'> & { $id: string };
-  };
-  $id?: '';
-  $ref?: string;
-
-  const?: unknown;
-
-  items?: V7Schema | false;
-  prefixItems?: V7Schema[];
-
-  properties?: Record<string, V7Schema>;
-  required?: string[];
-
-  minimum?: number;
-  maximum?: number;
-  exclusiveMinimum?: number;
-  exclusiveMaximum?: number;
-
-  minLength?: number;
-  maxLength?: number;
-
-  pattern?: string;
-
-  title?: string;
-  description?: string;
-  default?: unknown;
-  examples?: unknown[];
-  deprecated?: true;
-  readOnly?: true;
-  writeOnly?: true;
-}
-
 export const _nullSchema = { const: null };
 export const _toConstSchema = <T>(primitive: T): { const: T } => ({ const: primitive });
 
-export const _loadLimits = (obj: V7Schema, schema: AnySchema, startIndex: number): V7Schema => {
+export const _loadLimits = (
+  obj: Record<string, any>,
+  schema: AnySchema,
+  startIndex: number,
+): Record<string, any> => {
   // @ts-ignore
   while (startIndex < schema.length) {
     // @ts-ignore
@@ -64,12 +27,27 @@ export const _loadLimits = (obj: V7Schema, schema: AnySchema, startIndex: number
   return obj;
 };
 
-/**
- * Convert an stnl schema to a draft-07 JSON schema
- */
-export const v7 = (schema: AnySchema): V7Schema => {
+export const _loadProps = (schema: AnySchema): Record<string, Record<string, any>> => {
+  const props: Record<string, Record<string, any>> = {};
+
   // @ts-ignore
-  const id: number = schema[0];
+  const requiredProps: Record<string, AnySchema> = schema[1];
+  for (const key in requiredProps) props[key] = v7(requiredProps[key]);
+
+  // @ts-ignore
+  if (schema.length > 2) {
+    // @ts-ignore
+    const optionalProps: Record<string, AnySchema> | undefined = schema[2];
+    for (const key in optionalProps) props[key] = v7(optionalProps[key]);
+  }
+
+  return props;
+};
+
+/**
+ * Generic handler for other types
+ */
+export const _handleOtherTypes = (schema: AnySchema, id: number): Record<string, any> => {
   if (id === 0) return _loadLimits({}, schema, 1);
   else if (id === 1) return _loadLimits({ type: 'number' }, schema, 1);
   else if (id === 2) return _loadLimits({ type: 'integer' }, schema, 1);
@@ -98,28 +76,12 @@ export const v7 = (schema: AnySchema): V7Schema => {
       schema,
       2,
     );
-  else if (id === 8) {
-    const props: Record<string, V7Schema> = {};
-
-    // @ts-ignore
-    const requiredProps: Record<string, AnySchema> = schema[1];
-    for (const key in requiredProps) props[key] = v7(requiredProps[key]);
-
-    // @ts-ignore
-    const optionalProps: Record<string, AnySchema> | undefined = schema[2];
-    if (optionalProps != null) for (const key in optionalProps) props[key] = v7(optionalProps[key]);
-
+  else if (id === 8)
     return {
       type: 'object',
-      properties: props,
-      required: Object.keys(requiredProps),
-    };
-  } else if (id === 9)
-    return {
-      type: 'array',
+      properties: _loadProps(schema),
       // @ts-ignore
-      prefixItems: schema[1].map(v7),
-      items: false,
+      required: Object.keys(schema[1]),
     };
   else if (id === 10) {
     // @ts-ignore
@@ -127,25 +89,17 @@ export const v7 = (schema: AnySchema): V7Schema => {
     // @ts-ignore
     const map: Record<string, Schema<Record<string, AnySchema>, any>> = schema[2];
 
-    const cases: V7Schema[] = [];
+    const cases: Record<string, any>[] = [];
     for (const key in map) {
       const currentSchema = map[key];
 
-      const props: Record<string, V7Schema> = {};
+      const props = _loadProps(currentSchema);
       props[prop] = _toConstSchema(key);
-
-      // @ts-ignore
-      const requiredProps: Record<string, AnySchema> = currentSchema[1];
-      for (const key in requiredProps) props[key] = v7(requiredProps[key]);
-
-      // @ts-ignore
-      const optionalProps: Record<string, AnySchema> | undefined = currentSchema[2];
-      if (optionalProps != null)
-        for (const key in optionalProps) props[key] = v7(optionalProps[key]);
 
       cases.push({
         properties: props,
-        required: Object.keys(requiredProps),
+        // @ts-ignore
+        required: Object.keys(schema[1]),
       });
     }
 
@@ -160,28 +114,66 @@ export const v7 = (schema: AnySchema): V7Schema => {
       $ref: schema[1],
     };
   else if (id === 12) {
-    const defs: V7Schema['$defs'] & {} = {};
-
-    // @ts-ignore
-    const map: Record<string, AnySchema> | undefined = schema[2];
-    for (const key in map) {
-      const schema = map[key];
-      // @ts-ignore also a root schema
-      if (schema[0] === 12) defs[key] = { $id: key as any, anyOf: [v7(schema)] };
-      else {
-        const child = v7(schema);
-        child.$id = key as any;
-        defs[key] = child as any;
-      }
-    }
-
     // @ts-ignore
     const root = v7(schema[1]);
     root.$id = '';
-    root.$defs = defs;
 
-    return root;
+    const $defs: Record<string, Record<string, any>> = {
+      // @ts-ignore
+      '': root,
+    };
+
+    // @ts-ignore
+    if (schema.length > 2) {
+      // @ts-ignore
+      const map: Record<string, AnySchema> | undefined = schema[2];
+      for (const key in map) {
+        const child = v7(map[key]);
+        child.$id = key;
+        $defs[key] = child;
+      }
+    }
+
+    return { $defs, $ref: '' };
   }
 
   throw new Error('Unknown schema base type: ' + id);
+};
+
+/**
+ * Convert an stnl schema to a draft 07 JSON schema
+ */
+export const v7 = (schema: AnySchema): Record<string, any> => {
+  // @ts-ignore
+  const id: number = schema[0];
+  return id === 9
+    ? {
+        type: 'array',
+        // @ts-ignore
+        items: schema[1].map(v7),
+        // @ts-ignore Easier to compile than additionalItems
+        maxItems: schema[1].length,
+      }
+    : _handleOtherTypes(schema, id);
+};
+
+/**
+ * Convert an stnl schema to a OpenAPI v3 compatible JSON schema
+ */
+export const openapi3: typeof v7 = v7;
+
+/**
+ * Convert an stnl schema to a draft 2020-12 JSON schema
+ */
+export const v2020_12 = (schema: AnySchema): Record<string, any> => {
+  // @ts-ignore
+  const id: number = schema[0];
+  return id === 9
+    ? {
+        type: 'array',
+        // @ts-ignore
+        prefixItems: schema[1].map(v7),
+        items: false,
+      }
+    : _handleOtherTypes(schema, id);
 };

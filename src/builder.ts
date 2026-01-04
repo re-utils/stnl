@@ -25,8 +25,6 @@ export type AnyLimit = Limit<any>;
 
 export interface Schema<out Type, out Refs extends string> extends Ref<Refs> {
   '~type': Type;
-}
-export interface ExtendableSchema<out Type, out Refs extends string> extends Schema<Type, Refs> {
   concat: <Limits extends Limit<Type>[]>(limits: Limits) => this;
 }
 export type AnySchema = Schema<any, any>;
@@ -54,12 +52,12 @@ export type InferScopeSchema<
 /**
  * Any type
  */
-export const any: ExtendableSchema<unknown, never> = [0] as any;
+export const any: Schema<unknown, never> = [0] as any;
 
 /**
  * A float
  */
-export const float: ExtendableSchema<number, never> = [1] as any;
+export const float: Schema<number, never> = [1] as any;
 
 /**
  * An integer
@@ -74,7 +72,7 @@ export const bool: Schema<boolean, never> = [3] as any;
 /**
  * A string
  */
-export const string: ExtendableSchema<string, never> = [4] as any;
+export const string: Schema<string, never> = [4] as any;
 
 /**
  * Make a type nullable
@@ -95,7 +93,7 @@ export const discrete = <const T extends [string, string, ...string[]]>(
  * Create an array schema
  * @param item
  */
-export const list = <T extends AnySchema>(item: T): ExtendableSchema<T['~type'][], T['~ref']> =>
+export const list = <T extends AnySchema>(item: T): Schema<T['~type'][], T['~ref']> =>
   [7, item] as any;
 
 /**
@@ -204,6 +202,11 @@ export const module = <const T extends Record<string, AnySchema>>(
   for (const key in mod) scopedMod[key] = scope(ref(key), mod);
   return scopedMod as any;
 };
+
+/**
+ * Define custom metadata
+ */
+export const meta = (key: string, value: any): Limit<any> => [0, key, value] as any;
 
 /**
  * Define the length upper bound

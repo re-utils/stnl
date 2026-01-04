@@ -1,5 +1,4 @@
 import { expect, describe, test } from 'bun:test';
-import * as stnl from 'stnl';
 
 export namespace types {
   export type Evaluate<T> = {
@@ -50,6 +49,23 @@ export namespace tests {
           expect(fn(value)).toBeFalse();
         });
       }
+    });
+  };
+
+  export const toJSONSchema = <const Result extends Record<string, Record<string, any>>>(
+    result: Result,
+    expected: {
+      [K in keyof Result]: Record<string, any> | Exclude<keyof Result, K>;
+    },
+  ) => {
+    describe('toJSONSchema', () => {
+      for (const key in result)
+        test(key, () => {
+          let expectedResult = expected[key];
+          while (typeof expectedResult === 'string')
+            expectedResult = expected[expectedResult as keyof Result];
+          expect(result[key]).toEqual(expectedResult as any);
+        });
     });
   };
 }

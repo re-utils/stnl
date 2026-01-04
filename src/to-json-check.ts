@@ -1,6 +1,5 @@
 import type { AnySchema, Limit, Schema } from './builder.ts';
 import { addExtraCode, evaluate, injectDependency, type LocalValue } from 'runtime-compiler';
-import { assertProperty } from './utils.ts';
 
 export const _compileLimits = (schema: AnySchema, input: string, startIndex: number): string => {
   let str = '';
@@ -30,17 +29,13 @@ export const _compileObject = (schema: AnySchema, input: string): string => {
   let str = '';
   // @ts-ignore
   const required: Record<string, AnySchema> = schema[1];
-  for (const key in required) {
-    assertProperty(key);
-    str += '&&' + code(required[key], input + '.' + key);
-  }
+  for (const key in required) str += '&&' + code(required[key], input + '.' + key);
 
   // @ts-ignore
   if (schema.length > 2) {
     // @ts-ignore
     const optional: Record<string, AnySchema> | undefined = schema[2];
     for (const key in optional) {
-      assertProperty(key);
       const keyInput = input + '.' + key;
       str += '&&(typeof ' + keyInput + '==="undefined"||' + code(optional[key], keyInput) + ')';
     }

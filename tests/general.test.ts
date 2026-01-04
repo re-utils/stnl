@@ -1,5 +1,5 @@
 import { tests, types } from './utils.ts';
-import { t, toJSONCheck } from 'stnl';
+import { t, toJSONCheck, toJSONSchema } from 'stnl';
 import { describe } from 'bun:test';
 
 describe('simple objects', () => {
@@ -9,9 +9,7 @@ describe('simple objects', () => {
       id: t.int.concat([t.min(0)]),
     });
     type T = (typeof T)['~type'];
-    const tJSONCheck = toJSONCheck.compile(T);
 
-    types.ExpectTrue<types.Equal<T, types.ReturnGuard<typeof tJSONCheck>>>;
     types.ExpectTrue<
       types.Equal<
         T,
@@ -22,6 +20,34 @@ describe('simple objects', () => {
       >
     >;
 
+    tests.toJSONSchema(
+      {
+        v7: toJSONSchema.v7(T),
+        v2020_12: toJSONSchema.v2020_12(T),
+        openapi3: toJSONSchema.openapi3(T),
+      },
+      {
+        v7: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 3,
+            },
+            id: {
+              type: 'integer',
+              minimum: 0,
+            },
+          },
+          required: ['name', 'id'],
+        },
+        v2020_12: 'v7',
+        openapi3: 'v7'
+      },
+    );
+
+    const tJSONCheck = toJSONCheck.compile(T);
+    types.ExpectTrue<types.Equal<T, types.ReturnGuard<typeof tJSONCheck>>>;
     tests.toJSONCheck(tJSONCheck, {
       truthy: {
         'exact match': {
@@ -61,9 +87,7 @@ describe('simple objects', () => {
       },
     );
     type T = (typeof T)['~type'];
-    const tJSONCheck = toJSONCheck.compile(T);
 
-    types.ExpectTrue<types.Equal<T, types.ReturnGuard<typeof tJSONCheck>>>;
     types.ExpectTrue<
       types.Equal<
         T,
@@ -75,6 +99,37 @@ describe('simple objects', () => {
       >
     >;
 
+    tests.toJSONSchema(
+      {
+        v7: toJSONSchema.v7(T),
+        v2020_12: toJSONSchema.v2020_12(T),
+        openapi3: toJSONSchema.openapi3(T),
+      },
+      {
+        v7: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 3,
+            },
+            id: {
+              type: 'integer',
+              minimum: 0,
+            },
+            displayName: {
+              type: 'string'
+            }
+          },
+          required: ['name', 'id'],
+        },
+        v2020_12: 'v7',
+        openapi3: 'v7'
+      },
+    );
+
+    const tJSONCheck = toJSONCheck.compile(T);
+    types.ExpectTrue<types.Equal<T, types.ReturnGuard<typeof tJSONCheck>>>;
     tests.toJSONCheck(tJSONCheck, {
       truthy: {
         'exact match': {
