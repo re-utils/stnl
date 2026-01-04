@@ -22,8 +22,6 @@ export interface HeadersParser<in out T extends HeadersSchema> {
   (headers: Headers): this['~type'] | null;
 }
 
-export const UNKNOWN_CHARACTER: RegExp = /[^A-Za-z0-9-]/;
-
 export const code = <T extends HeadersSchema>(schema: T): LocalValue<HeadersParser<T>> => {
   // @ts-ignore
   if (schema[0] !== 8) throw new Error('Only object schema is supported');
@@ -48,7 +46,7 @@ export const code = <T extends HeadersSchema>(schema: T): LocalValue<HeadersPars
     if (id === 3) {
       str += '=o.has("' + key + '")';
     } else {
-      str += '=o.has("' + key + '")';
+      str += '=o.get("' + key + '")';
 
       if (id === 4) {
         condition += '&&' + input + '!==null' + _compileLimits(propSchema, input, 1);
@@ -87,7 +85,7 @@ export const code = <T extends HeadersSchema>(schema: T): LocalValue<HeadersPars
       if (id === 3) {
         str += '=o.has("' + key + '")';
       } else {
-        str += '=o.has("' + key + '")';
+        str += '=o.get("' + key + '")';
 
         if (id === 6) {
           condition += '&&(' + input + '===null';
