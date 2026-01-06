@@ -152,7 +152,7 @@ export const _compile = (schema: AnySchema, input: string): Expression<boolean> 
       input +
       ')&&' +
       input +
-      '.every($' +
+      '.every(' +
       _compileToFn(
         // @ts-ignore
         schema[1],
@@ -216,7 +216,7 @@ export const _cleanOutput = (str: string): string => str.replace(/(?:\$_,)|(?:le
  */
 export const code = <T extends AnySchema>(
   schema: T,
-  target: Identifier<(o: any) => boolean>,
+  target: string,
 ): Statement => {
   let fn = _compileToFn(schema, false);
   fn = ((_vars.length === 0 ? '{' : '{' + _cleanOutput('let $_' + _vars + ';')) +
