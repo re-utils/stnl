@@ -1,10 +1,12 @@
 import type { AnySchema, Limit, Schema } from './builder.ts';
-import { addExtraCode, evaluate, injectDependency, type Expression } from 'runtime-compiler';
+import type { Expression, Identifier, Statement } from 'runtime-compiler';
+
+let _vars = '';
+let _currentId = 0;
 
 export const _compileLimits = (schema: AnySchema, input: string, startIndex: number): string => {
   let str = '';
 
-  // @ts-ignore
   while (startIndex < schema.length) {
     str += '&&';
 
@@ -29,21 +31,86 @@ export const _compileObject = (schema: AnySchema, input: string): string => {
   let str = '';
   // @ts-ignore
   const required: Record<string, AnySchema> = schema[1];
-  for (const key in required) str += '&&' + code(required[key], input + '.' + key);
+  for (const key in required) str += '&&' + _compile(required[key], input + '.' + key);
 
-  // @ts-ignore
   if (schema.length > 2) {
     // @ts-ignore
     const optional: Record<string, AnySchema> | undefined = schema[2];
     for (const key in optional) {
       const keyInput = input + '.' + key;
-      str += '&&(typeof ' + keyInput + '==="undefined"||' + code(optional[key], keyInput) + ')';
+      str += '&&(typeof ' + keyInput + '==="undefined"||' + _compile(optional[key], keyInput) + ')';
     }
   }
   return str;
 };
 
-export const code = (schema: AnySchema, input: string): Expression<boolean> => {
+export const _compileScopeToFn = (schema: AnySchema): Identifier<(o: any) => boolean> => {
+  const currentId = _currentId++;
+
+  // Save current scope info and create a subscope
+  let prevScope = _vars + ',$' + currentId + ';{let $';
+  let loadRefs = '';
+
+  _vars = '';
+
+  // Set current schema as $ in subscope for self-reference
+  // Scope output must be lazy functions
+  if (schema.length > 2) {
+    // @ts-ignore
+    const map: Record<string, AnySchema> | undefined = schema[2];
+    // Scope output must be lazy functions
+    for (const key in map) {
+      prevScope += ',' + key;
+      loadRefs += ';' + key + '=' + _compileToFn(map[key], false);
+    }
+  }
+
+  // Root can be compile to expression if set last
+  const root = _compileToFn(
+    // @ts-ignore
+    schema[1],
+    false,
+  );
+
+  // Reset to previous scope values
+  _vars =
+    // Load variables
+    prevScope +
+    _vars +
+    loadRefs +
+    // Load self
+    ';$' +
+    currentId +
+    '=$=' +
+    root +
+    '}let $_';
+  return ('$' + currentId) as any;
+};
+
+// This is a pass to optimize output for inlinable functions
+export const _compileToFn = (
+  schema: AnySchema,
+  saveFn: boolean,
+): Expression<(o: any) => boolean> => {
+  // @ts-ignore
+  const id: number = schema[0];
+
+  if (id === 1) {
+    if (schema.length === 1) return 'Number.isFinite' as any;
+  } else if (id === 2) {
+    if (schema.length === 1) return 'Number.isInteger' as any;
+  } else if (id === 12) return _compileScopeToFn(schema);
+
+  if (saveFn) {
+    const condition = _compile(schema, 'o');
+    _vars += ',$' + _currentId + '=o=>' + condition;
+    return ('$' + _currentId++) as any;
+  }
+
+  return ('o=>' + _compile(schema, 'o')) as any;
+};
+
+export const _compile = (schema: AnySchema, input: string): Expression<boolean> => {
   // @ts-ignore
   const id: number = schema[0];
   if (id === 0)
@@ -56,37 +123,45 @@ export const code = (schema: AnySchema, input: string): Expression<boolean> => {
   else if (id === 4)
     return ('typeof ' + input + '==="string"' + _compileLimits(schema, input, 1)) as any;
   else if (id === 5)
-    return (input +
-      '===null&&' +
-      // @ts-ignore
-      _compile(schema[1], input, scopeDeps)) as any;
+    // (o===null||...)
+    return ('(' +
+      input +
+      '===null||' +
+      _compile(
+        // @ts-ignore
+        schema[1],
+        input,
+      ) +
+      ')') as any;
   else if (id === 6) {
     // @ts-ignore
     const list: string[] = schema[1];
 
-    input += '===';
-    let str = input + JSON.stringify(list[0]);
+    // o==="
+    input += '==="';
+    let str = input + list[0] + '"';
 
+    // &&o==="
     input = '&&' + input;
-    for (let i = 1; i < list.length; i++) str += input + JSON.stringify(list[i]);
+    // &&o==="key"
+    for (let i = 1; i < list.length; i++) str += input + list[i] + '"';
     return str as any;
-  } else if (id === 7)
+  } else if (id === 7) {
+    // Array.isArray(o)&&o.every($i);
     return ('Array.isArray(' +
       input +
       ')&&' +
       input +
-      '.every(' +
-      injectDependency(
-        'o=>' +
-          code(
-            // @ts-ignore
-            schema[1],
-            'o',
-          ),
+      '.every($' +
+      _compileToFn(
+        // @ts-ignore
+        schema[1],
+        true,
       ) +
       ')' +
       _compileLimits(schema, input, 2)) as any;
-  else if (id === 8)
+  } else if (id === 8)
+    // typeof o==="object"&&o!==null...
     return ('typeof ' +
       input +
       '==="object"&&' +
@@ -97,52 +172,80 @@ export const code = (schema: AnySchema, input: string): Expression<boolean> => {
     // @ts-ignore
     const items: AnySchema[] = schema[1];
 
+    // Array.isArray(o)&&o.length===?
     let str = 'Array.isArray(' + input + ')&&' + input + '.length===' + items.length;
-    for (let i = 0; i < items.length; i++) str += '&&' + code(schema, input + '[' + i + ']');
+
+    // o[
+    input += '[';
+    // Array.isArray(o)&&o.length===?&&#check0(o[0])&&#check1(o[1])...
+    for (let i = 0; i < items.length; i++) str += '&&' + _compile(schema, input + i + ']');
+
     return str as any;
   } else if (id === 10) {
-    // @ts-ignore
-    const prop: string = input + getAccessor(schema[1]) + '===';
+    // o.discriminator==="
+    const prop: string =
+      input +
+      '.' +
+      // @ts-ignore
+      schema[1] +
+      '==="';
     // @ts-ignore
     const map: Record<string, Schema<Record<string, AnySchema>, any>> = schema[2];
 
+    // typeof o==='object'&&o!==null&&(
     let str = 'typeof ' + input + '==="object"&&' + input + '!==null&&(';
     for (const key in map)
-      str += prop + JSON.stringify(key) + '?true' + _compileObject(map[key], input) + ':';
+      // o.discriminator==="key"?true&&limit1&&limit2:
+      str += prop + key + '"?true' + _compileObject(map[key], input) + ':';
     return (str + 'false)') as any;
   } else if (id === 11)
-    return ('d' +
+    // key(o) or $(o) for self ref
+    return (
       // @ts-ignore
-      schema[1] +
-      '(' +
-      input +
-      ')') as any;
-  else if (id === 12) {
-    let scope =
-      '(()=>{var d=o=>' +
-      code(
-        // @ts-ignore
-        schema[1],
-        'o',
-      );
+      (schema[1] + '(' + input + ')') as any
+    );
+  else if (id === 12) return (_compileScopeToFn(schema) + '(' + input + ')') as any;
+  else return 'false' as any;
+};
 
-    // @ts-ignore
-    if (schema.length > 2) {
-      // @ts-ignore
-      const map: Record<string, AnySchema> | undefined = schema[2];
-      for (const key in map) scope += ',d' + key + '=o=>' + code(map[key], 'o');
-    }
+export const _cleanOutput = (str: string): string => str.replace(/(?:\$_,)|(?:let \$_;)/g, '');
 
-    return (injectDependency(scope + ';return d})()') + '(' + input + ')') as any;
-  }
+/**
+ * Compile a JSON check function from a schema to code
+ * @param schema
+ */
+export const code = <T extends AnySchema>(
+  schema: T,
+  target: Identifier<(o: any) => boolean>,
+): Statement => {
+  let fn = _compileToFn(schema, false);
+  fn = ((_vars.length === 0 ? '{' : '{' + _cleanOutput('let $_' + _vars + ';')) +
+    target +
+    '=' +
+    fn +
+    '}') as any;
 
-  throw new Error('Unknown schema base type: ' + id);
+  // Reset scope
+  _vars = '';
+  _currentId = 0;
+
+  // Remove unused variables
+  return fn as any;
 };
 
 /**
  * Compile a JSON check function from a schema
  * @param schema
  */
-export const compile = <T extends AnySchema>(schema: T): ((o: any) => o is T['~type']) => (
-  addExtraCode('return o=>' + code(schema, 'o')), evaluate()
-);
+export const compile = <T extends AnySchema>(schema: T): ((o: any) => o is T['~type']) => {
+  let fn = _compileToFn(schema, false);
+  fn = ((_vars.length === 0 ? 'return ' : _cleanOutput('let $_' + _vars + ';') + 'return ') +
+    fn) as any;
+
+  // Reset scope
+  _vars = '';
+  _currentId = 0;
+
+  // Remove unused variables
+  return Function(fn)();
+};

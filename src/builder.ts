@@ -3,7 +3,7 @@ import type { Evaluate } from './types';
 export interface Ref<out T extends string> {
   '~ref': T;
 }
-export type SelfRef = Ref<''>;
+export type SelfRef = Ref<'$'>;
 export type ResolveRef<
   RefMap extends Record<string, any>,
   RootType,
@@ -17,18 +17,6 @@ export type ResolveRef<
           [K in keyof CurrentType]: ResolveRef<RefMap, RootType, CurrentType[K]>;
         }
       : CurrentType;
-
-export interface Limit<out Type> {
-  '~type': Type;
-}
-export type AnyLimit = Limit<any>;
-
-export interface Schema<out Type, out Refs extends string> extends Ref<Refs> {
-  '~type': Type;
-  concat: <Limits extends Limit<Type>[]>(limits: Limits) => this;
-}
-export type AnyResolvedSchema = Schema<any, never>;
-export type AnySchema = Schema<any, any>;
 
 export type InferScopeSchema<
   T extends Schema<any, any>,
@@ -46,9 +34,23 @@ export type InferScopeSchema<
         T['~type'],
         T['~type']
       >,
-      Exclude<T['~ref'] | (ResolveMap[keyof ResolveMap] & {})['~ref'], '' | keyof ResolveMap>
+      Exclude<T['~ref'] | (ResolveMap[keyof ResolveMap] & {})['~ref'], '$' | keyof ResolveMap>
     >
-  : Schema<T['~type'], Exclude<T['~ref'], ''>>;
+  : Schema<T['~type'], Exclude<T['~ref'], '$'>>;
+
+export interface Limit<out Type> {
+  '~type': Type;
+  length: number;
+}
+export type AnyLimit = Limit<any>;
+
+export interface Schema<out Type, out Refs extends string> extends Ref<Refs> {
+  '~type': Type;
+  length: number;
+  concat: <Limits extends Limit<Type>[]>(limits: Limits) => this;
+}
+export type AnyResolvedSchema = Schema<any, never>;
+export type AnySchema = Schema<any, any>;
 
 /**
  * Any type
@@ -168,7 +170,7 @@ export const ref = <const T extends string>(name: T): Schema<Ref<T>, T> => [11, 
 /**
  * Reference to the parent scope schema
  */
-export const self: Schema<SelfRef, ''> = [11, ''] as any;
+export const self: Schema<SelfRef, '$'> = [11, '$'] as any;
 
 /**
  * Resolve unknown references of a schema

@@ -120,7 +120,7 @@ export const _handleOtherTypes = (schema: AnySchema, id: number): Record<string,
 
     const $defs: Record<string, Record<string, any>> = {
       // @ts-ignore
-      '': root,
+      $: root,
     };
 
     // @ts-ignore
@@ -134,7 +134,7 @@ export const _handleOtherTypes = (schema: AnySchema, id: number): Record<string,
       }
     }
 
-    return { $defs, $ref: '' };
+    return { $defs, $ref: '$' };
   }
 
   throw new Error('Unknown schema base type: ' + id);

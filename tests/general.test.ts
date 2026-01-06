@@ -42,7 +42,7 @@ describe('simple objects', () => {
           required: ['name', 'id'],
         },
         v2020_12: 'v7',
-        openapi3: 'v7'
+        openapi3: 'v7',
       },
     );
 
@@ -118,13 +118,13 @@ describe('simple objects', () => {
               minimum: 0,
             },
             displayName: {
-              type: 'string'
-            }
+              type: 'string',
+            },
           },
           required: ['name', 'id'],
         },
         v2020_12: 'v7',
-        openapi3: 'v7'
+        openapi3: 'v7',
       },
     );
 
