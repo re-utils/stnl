@@ -1,5 +1,4 @@
 import type { AnySchema, Limit, Schema } from './builder.ts';
-import type { Expression, Identifier, Statement } from 'runtime-compiler';
 
 let _vars = '';
 let _currentId = 0;
@@ -44,7 +43,7 @@ export const _compileObject = (schema: AnySchema, input: string): string => {
   return str;
 };
 
-export const _compileScopeToFn = (schema: AnySchema): Identifier<(o: any) => boolean> => {
+export const _compileScopeToFn = (schema: AnySchema): string => {
   const currentId = _currentId++;
 
   // Save current scope info and create a subscope
@@ -88,10 +87,7 @@ export const _compileScopeToFn = (schema: AnySchema): Identifier<(o: any) => boo
 };
 
 // This is a pass to optimize output for inlinable functions
-export const _compileToFn = (
-  schema: AnySchema,
-  saveFn: boolean,
-): Expression<(o: any) => boolean> => {
+export const _compileToFn = (schema: AnySchema, saveFn: boolean): string => {
   // @ts-ignore
   const id: number = schema[0];
 
@@ -110,7 +106,7 @@ export const _compileToFn = (
   return ('o=>' + _compile(schema, 'o')) as any;
 };
 
-export const _compile = (schema: AnySchema, input: string): Expression<boolean> => {
+export const _compile = (schema: AnySchema, input: string): string => {
   // @ts-ignore
   const id: number = schema[0];
   if (id === 0)
@@ -214,23 +210,20 @@ export const _cleanOutput = (str: string): string => str.replace(/(?:\$_,)|(?:le
  * Compile a JSON check function from a schema to code
  * @param schema
  */
-export const code = <T extends AnySchema>(
-  schema: T,
-  target: string,
-): Statement => {
+export const code = <T extends AnySchema>(schema: T, target: string): string => {
   let fn = _compileToFn(schema, false);
-  fn = ((_vars.length === 0 ? '{' : '{' + _cleanOutput('let $_' + _vars + ';')) +
+  fn =
+    (_vars.length === 0 ? '{' : '{' + _cleanOutput('let $_' + _vars + ';')) +
     target +
     '=' +
     fn +
-    '}') as any;
+    '}';
 
   // Reset scope
   _vars = '';
   _currentId = 0;
 
-  // Remove unused variables
-  return fn as any;
+  return fn;
 };
 
 /**
@@ -239,13 +232,12 @@ export const code = <T extends AnySchema>(
  */
 export const compile = <T extends AnySchema>(schema: T): ((o: any) => o is T['~type']) => {
   let fn = _compileToFn(schema, false);
-  fn = ((_vars.length === 0 ? 'return ' : _cleanOutput('let $_' + _vars + ';') + 'return ') +
-    fn) as any;
+  _vars.length > 0 && (fn = _cleanOutput('let $_' + _vars + ';') + fn);
 
   // Reset scope
   _vars = '';
   _currentId = 0;
 
-  // Remove unused variables
-  return Function(fn)();
+  // Indirect eval is a little faster than Function at startup
+  return (0, eval)(fn);
 };

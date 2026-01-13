@@ -1,6 +1,6 @@
 {
   "name": "stnl",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A simple, opinionated schema library built for performance",
   "keywords": [
     "schema",
@@ -31,7 +31,6 @@
     "oxc-minify": "^0.64.0",
     "oxc-transform": "^0.65.0",
     "oxfmt": "^0.16.0",
-    "runtime-compiler": "^3.0.0",
     "stnl": "./lib",
     "typebox": "^1.0.73",
     "typescript": "^5.9.3",

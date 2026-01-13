@@ -13,7 +13,6 @@
         "oxc-minify": "^0.64.0",
         "oxc-transform": "^0.65.0",
         "oxfmt": "^0.16.0",
-        "runtime-compiler": "^3.0.0",
         "stnl": "./lib",
         "typebox": "^1.0.73",
         "typescript": "^5.9.3",
@@ -167,8 +166,6 @@
     "readable-stream": ["readable-stream@3.6.2", "", { "dependencies": { "inherits": "^2.0.3", "string_decoder": "^1.1.1", "util-deprecate": "^1.0.1" } }, "sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA=="],
 
     "require-directory": ["require-directory@2.1.1", "", {}, "sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q=="],
-
-    "runtime-compiler": ["runtime-compiler@3.0.0", "", {}, "sha512-9eYbwXERzd/983AzC0Z6GdlPGCYh1JI/fEcwx7qitjutQ1jamjEs3H0CzvUz7SmfCuUGLURrT31FHnhhW7qsNA=="],
 
     "safe-buffer": ["safe-buffer@5.2.1", "", {}, "sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ=="],
 

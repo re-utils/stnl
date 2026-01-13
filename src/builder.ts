@@ -1,4 +1,4 @@
-import type { Evaluate } from './types';
+import type { Evaluate } from './types.ts';
 
 export interface Ref<out T extends string> {
   '~ref': T;
