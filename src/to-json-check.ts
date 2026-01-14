@@ -239,5 +239,5 @@ export const compile = <T extends AnySchema>(schema: T): ((o: any) => o is T['~t
   _currentId = 0;
 
   // Indirect eval is a little faster than Function at startup
-  return (0, eval)(fn);
+  return (0, eval)('{' + fn + '}');
 };
